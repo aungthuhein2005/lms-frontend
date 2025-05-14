@@ -42,6 +42,12 @@ function App() {
             <Route path='students' element={<Students/>}/>
             <Route path='students/:id' element={<StudentDetail/>}/>
         </Route>
+         <Route path="/teachers" element={<Teachers />} />
+            <Route path="/classes" element={<Classes />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/teachers_attendance" element={<TeachersAttendance />} />
+            <Route path="/report" element={<Report />} />
       </Routes>
     </Router>
   );
