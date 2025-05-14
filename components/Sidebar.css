@@ -1,15 +1,13 @@
 .sidebar-container {
-  width: 260px;
+width: 260px;
+  height: 100vh; /* Full height of the viewport */
   background-color: #fff;
-  border-right: 1px solid #e0e0e0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: 'Segoe UI', sans-serif;
+  border-right: 1px solid #ddd;
+  overflow-y: auto; /* Enable vertical scroll */
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1040;
+  z-index: 1030;
 }
 
 .sidebar-header {
@@ -55,4 +53,17 @@
 
 .sidebar-footer {
   border-top: 1px solid #f0f0f0;
+}
+
+
+.custom-nav-link {
+  color: #444;
+  transition: background-color 0.2s ease;
+}
+
+.custom-nav-link.active {
+  background-color: #e8f0fe; /* light blue background */
+  font-weight: bold;
+  color: #000; /* make text darker */
+  border-radius: 6px;
 }

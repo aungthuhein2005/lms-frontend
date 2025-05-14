@@ -1,0 +1,22 @@
+.custom-alert {
+  border: none;
+  border-left: 5px solid var(--bs-alert-border-color, #0d6efd);
+  border-radius: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.custom-alert h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.custom-alert p {
+  font-size: 0.80rem;
+  color: #444;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
