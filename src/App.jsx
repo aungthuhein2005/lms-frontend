@@ -12,7 +12,6 @@ import Report from '../pages/Report';
 import StudentDetail from '../pages/StudentDetail';
 import Layout from '../components/Layout';
 
-
 function App() {
   return (
     <Router>
@@ -28,7 +27,7 @@ function App() {
               <Route path=':id' element={<StudentDetail />} />
             </Route>
             <Route path="/teachers" element={<Teachers />} />
-            <Route path="/classes" element={<Classes />} />
+            
             <Route path="/courses" element={<Courses />} />
             <Route path="/users" element={<Users />} />
             <Route path="/teachers_attendance" element={<TeachersAttendance />} />
@@ -41,6 +40,8 @@ function App() {
             <Route index element={<Dashboard/>}></Route>
             <Route path='students' element={<Students/>}/>
             <Route path='students/:id' element={<StudentDetail/>}/>
+            <Route path="/classes" element={<Classes />} />
+
         </Route>
       </Routes>
     </Router>
