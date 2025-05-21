@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Card } from "react-bootstrap";
 
 const Module = () => {
   const { courseId } = useParams();
@@ -11,12 +11,26 @@ const Module = () => {
   const [showEditModule, setShowEditModule] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [editStatus, setEditStatus] = useState(false);
+  const [lesson, setLesson] = useState([]);
   const [eModule, setEModule] = useState({
     id: "",
     name: "",
     description: "",
   });
+  const [showAddLesson, setShowAddLesson] = useState(false);
+  const [title, setTitle] = useState("");
+  const [media, setMedia] = useState("");
+  const [eLesson, setELesson] = useState({
+    id: "",
+    title: "",
+    media: "",
+  });
+  const [editStatus, setEditStatus] = useState(false);
+  function editLesson(editedlesson) {
+    setEditStatus(true);
+    setELesson(editedlesson);
+  }
+
   const handleAddShow = () => {
     setName("");
     setDescription("");
@@ -30,6 +44,13 @@ const Module = () => {
     setShowEditModule(true);
   };
   const handleEditClose = () => setShowEditModule(false);
+
+  const AddLessonShow = () => {
+    setTitle("");
+    setMedia("");
+    setShowAddLesson(true);
+  };
+  const AddLessonClose = () => setShowAddLesson(false);
 
   useEffect(() => {
     const fetchCourseAndModules = async () => {
@@ -46,6 +67,30 @@ const Module = () => {
     };
     fetchCourseAndModules();
   }, [courseId]);
+
+  const fetchLessons = async (moduleId) => {
+    console.log("Fetching lessons for moduleId:", moduleId);
+    if (!moduleId) {
+      console.error("moduleId is undefined!");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/lessons/module/${moduleId}`
+      );
+      setLesson((prev) => ({
+        ...prev,
+        [moduleId]: response.data,
+      }));
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+    }
+  };
+  useEffect(() => {
+    if (modules.length > 0) {
+      modules.forEach((module) => fetchLessons(module.id));
+    }
+  }, [modules]);
 
   async function getModulesByCourseId(courseId) {
     const response = await axios.get(
@@ -74,8 +119,52 @@ const Module = () => {
     setEModule({ id: "", name: "", description: "" });
   }
   async function deletedModule(moduleId) {
-    await axios.delete(`http://localhost:8080/modules/${moduleId}`);
+    axios.delete(`http://localhost:8080/modules/${moduleId}`);
     await getModulesByCourseId(courseId);
+  }
+
+  async function addLesson(new_lesson) {
+    try {
+      const payload = {
+        title: new_lesson.title,
+        media: new_lesson.media,
+        module: {
+          id: new_lesson.moduleId,
+        },
+      };
+      const response = await axios.post(
+        `http://localhost:8080/lessons/create`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(response.data);
+      setShowAddLesson(false);
+      setELesson({ id: "", title: "", media: "" });
+      fetchLessons(new_lesson.moduleId);
+    } catch (error) {
+      console.error(
+        "Error creating lesson:",
+        error.response?.data || error.message
+      );
+    }
+  }
+
+  async function deletedLesson(lessonId, moduleId) {
+    await axios.delete(`http://localhost:8080/lessons/${lessonId}`);
+    fetchLessons(moduleId);
+  }
+
+  async function updateLesson(lessonId, updatedlesson) {
+    await axios
+      .put(`http://localhost:8080/lessons/${lessonId}`, updatedlesson)
+      .then((response) => console.log(response.data));
+    fetchLessons(lessonId);
+    setEditStatus(false);
+    setELesson({ id: "", title: "", media: "" });
   }
 
   return (
@@ -131,7 +220,7 @@ const Module = () => {
           </div>
         </div>
 
-        <div className="accordion  mt-3" id="accordionExample">
+        <div className="accordion mt-3 " id="accordionExample">
           {modules.map((module) => (
             <div className="accordion-item mt-3" key={module.id}>
               <h2 className="accordion-header" id="headingOne">
@@ -143,7 +232,10 @@ const Module = () => {
                   aria-expanded="true"
                   aria-controls="collapseOne"
                 >
-                  <h3>{module.name}</h3>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <h3>{module.name}</h3>
+                    <p>{module.description}</p>
+                  </div>
                 </button>
               </h2>
               <div
@@ -153,63 +245,214 @@ const Module = () => {
                 data-bs-parent="#accordionExample"
               >
                 <div className="accordion-body">
-                  <p>{module.description}</p>
-                  <button
-                    className="btn btn-primary  me-2"
-                    onClick={() => handleEditShow(module)}
-                  >
-                    <i className="bx bxs-edit-alt"></i>
-                  </button>
-                  <Modal show={showEditModule} onHide={handleEditClose}>
-                    <Modal.Header closeButton>
-                      <Modal.Title>Module</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <form action="">
-                        <div className="mt-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Enter Name"
-                          />
+                  <strong>
+                    <div className="container">
+                      <div className="d-flex justify-content-end mb-3">
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => AddLessonShow()}
+                        >
+                          <i className="bx bx-message-square-add"></i> Add
+                          Lesson
+                        </button>
+                        <Modal show={showAddLesson} onHide={AddLessonClose}>
+                          <Modal.Header closeButton>
+                            <Modal.Title>Lesson</Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            <form action="">
+                              <div className="mt-3">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={eLesson.title}
+                                  onChange={(e) =>
+                                    setELesson({
+                                      ...eLesson,
+                                      title: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Enter Title"
+                                />
+                              </div>
+                              <div className="mt-3">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={eLesson.media}
+                                  onChange={(e) =>
+                                    setELesson({
+                                      ...eLesson,
+                                      media: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Media"
+                                />
+                              </div>
+                            </form>
+                          </Modal.Body>
+                          <Modal.Footer>
+                            <Button
+                              variant="secondary"
+                              onClick={AddLessonClose}
+                            >
+                              Close
+                            </Button>
+                            <Button
+                              variant="success"
+                              onClick={() =>
+                                addLesson({
+                                  title: eLesson.title,
+                                  media: eLesson.media,
+                                  moduleId: module.id,
+                                })
+                              }
+                            >
+                              <i className="bx  bx-save"></i> Save
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
+                      </div>
+                      {modules.map((module) => (
+                        <div key={module.id}>
+                          <ul>
+                            {(lesson[module.id] || []).map((lesson) =>
+                              editStatus && lesson.id == eLesson.id ? (
+                                <Card key={lesson.id} className="mb-3">
+                                  <Card.Body>
+                                    <Card.Title>
+                                      <input
+                                        type="text"
+                                        value={eLesson.title}
+                                        onChange={(e) =>
+                                          setELesson({
+                                            ...eLesson,
+                                            title: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </Card.Title>
+                                    <Card.Text>
+                                      <input
+                                        type="text"
+                                        value={eLesson.media}
+                                        onChange={(e) =>
+                                          setELesson({
+                                            ...eLesson,
+                                            media: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </Card.Text>
+                                    <div>
+                                      <button
+                                        className="btn btn-success me-2"
+                                        onClick={() =>
+                                          updateLesson(lesson.id, eLesson)
+                                        }
+                                      >
+                                        <i className="bx  bx-save"></i>
+                                      </button>
+                                      <button
+                                        className="btn btn-danger"
+                                        onClick={() =>
+                                          deletedLesson(lesson.id, module.id)
+                                        }
+                                      >
+                                        <i className="bx bxs-trash"></i>
+                                      </button>
+                                    </div>
+                                  </Card.Body>
+                                </Card>
+                              ) : (
+                                <Card key={lesson.id} className="mb-3">
+                                  <Card.Body>
+                                    <Card.Title>{lesson.title}</Card.Title>
+                                    <Card.Text>Media: {lesson.media}</Card.Text>
+                                    <div>
+                                      <button
+                                        className="btn btn-primary me-2"
+                                        onClick={() => editLesson(lesson)}
+                                      >
+                                        <i className="bx bxs-edit-alt"></i>
+                                      </button>
+                                      <button
+                                        className="btn btn-danger"
+                                        onClick={() =>
+                                          deletedLesson(lesson.id, module.id)
+                                        }
+                                      >
+                                        <i className="bx bxs-trash"></i>
+                                      </button>
+                                    </div>
+                                  </Card.Body>
+                                </Card>
+                              )
+                            )}
+                          </ul>
                         </div>
-                        <div className="mt-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Enter Description"
-                          />
-                        </div>
-                      </form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <Button variant="secondary" onClick={handleEditClose}>
-                        Close
-                      </Button>
-                      <Button
-                        variant="success"
-                        onClick={() =>
-                          updateModule({
-                            id: eModule.id,
-                            name: name,
-                            description: description,
-                          })
-                        }
+                      ))}
+                    </div>
+
+                    <div className="d-flex justify-content-end">
+                      <button
+                        className="btn btn-primary  me-2"
+                        onClick={() => handleEditShow(module)}
                       >
-                        <i className="bx  bx-save"></i> Update
-                      </Button>
-                    </Modal.Footer>
-                  </Modal>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => deletedModule(module.id)}
-                  >
-                    <i className="bx bxs-trash"></i>
-                  </button>
+                        <i className="bx bxs-edit-alt"></i>
+                      </button>
+                      <Modal show={showEditModule} onHide={handleEditClose}>
+                        <Modal.Header closeButton>
+                          <Modal.Title>Module</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <form action="">
+                            <div className="mt-3">
+                              <input
+                                type="text"
+                                className="form-control"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter Name"
+                              />
+                            </div>
+                            <div className="mt-3">
+                              <input
+                                type="text"
+                                className="form-control"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Enter Description"
+                              />
+                            </div>
+                          </form>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={handleEditClose}>
+                            Close
+                          </Button>
+                          <Button
+                            variant="success"
+                            onClick={() =>
+                              updateModule({
+                                id: eModule.id,
+                                name: name,
+                                description: description,
+                              })
+                            }
+                          >
+                            <i className="bx  bx-save"></i> Update
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => deletedModule(module.id)}
+                      >
+                        <i className="bx bxs-trash"></i>
+                      </button>
+                    </div>
+                  </strong>
                 </div>
               </div>
             </div>
