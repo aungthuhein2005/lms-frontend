@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser } from "./authThunk";
+import { loginUser, registerUser } from "./authThunk";
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
-    token: null,
-    isAuthenticated: false,
+    user: JSON.parse(localStorage.getItem("user")) || null,
+    token: localStorage.getItem("token") || null,
+    isAuthenticated: !!localStorage.getItem("token"),
     loading: false,
     error: null,
   },
@@ -15,6 +15,8 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
@@ -32,7 +34,23 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+
+      //register
+      .addCase(registerUser.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(registerUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
+    })
+    .addCase(registerUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
   },
 });
 

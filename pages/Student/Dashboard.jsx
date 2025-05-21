@@ -1,7 +1,12 @@
 import React from 'react';
 import { Card, Row, Col, ProgressBar, ListGroup, Alert, Button, Table } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
 
 export default function Dashboard() {
+
+  const user = useSelector((state) => state.auth.user);
+  
+
   const courses = [
     { title: "Mathematics", progress: 75 },
     { title: "Science", progress: 40 },
@@ -23,7 +28,7 @@ export default function Dashboard() {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Welcome back, Student!</h2>
+      <h2 className="mb-4">Welcome back, {user?.name}!</h2>
 
       {/* Alert Section */}
       <Alert variant="info">

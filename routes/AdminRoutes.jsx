@@ -13,6 +13,7 @@ import Courses from '../pages/Admin/Courses';
 import Users from '../pages/Admin/Users';
 import TeachersAttendance from '../pages/Admin/TeachersAttendance';
 import Report from '../pages/Admin/Report';
+import Module from '../pages/Admin/Module';
 
 const AdminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -24,6 +25,7 @@ const AdminRoutes = (
     <Route path="teachers/create" element={<TeacherCreate />} />
     <Route path="classes" element={<Classes />} />
     <Route path="courses" element={<Courses />} />
+    <Route path="courses/:courseId/modules" element={<Module />}/>
     <Route path="users" element={<Users />} />
     <Route path="teachers_attendance" element={<TeachersAttendance />} />
     <Route path="report" element={<Report />} />

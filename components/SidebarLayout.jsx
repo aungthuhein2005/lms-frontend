@@ -4,11 +4,12 @@ import {
   HouseDoor, Calendar, Envelope, ChatDots, Gear, PersonCircle, List
 } from 'react-bootstrap-icons';
 import './Sidebar.css';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import admin_image from '@/assets/teacher-profile.jpg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveLink } from '../features/ui/uiSlice';
+import { logout } from '../features/auth/authSlice';
 
 const Sidebar = ({tabs,role}) => {
   const [show, setShow] = useState(false);
@@ -21,6 +22,8 @@ const Sidebar = ({tabs,role}) => {
   }, [location.pathname, dispatch]);
 
   const toggleSidebar = () => setShow(!show);
+
+
 
   return (
     <>
@@ -50,8 +53,14 @@ const Sidebar = ({tabs,role}) => {
 };
 
 const SidebarContent = ({tabs,role}) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
   const activeLink = useSelector((state) => state.ui.activeLink);
-  
+    const handleLogout = () => {
+    dispatch(logout()); 
+    navigate('/login');
+
+  }
   return (
     <>
       <div className="sidebar-header">
@@ -71,6 +80,7 @@ const SidebarContent = ({tabs,role}) => {
             key={tab.name}
             className="custom-nav-link"
             active={activeLink === tab.path}
+             onClick={tab.name === 'Logout' ? handleLogout : undefined}
           >
             {tab.icon}
             <span className="ms-2">{tab.name}</span>

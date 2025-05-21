@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -11,17 +11,41 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../features/auth/authThunk";
 import logo from '@/assets/logo.png';
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
+   const { user, isAuthenticated, error, loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'ADMIN') {
+        navigate('/admin');
+      } else if (user.role === 'STUDENT') {
+        navigate('/student');
+      } else if (user.role === 'TEACHER') {
+        navigate('/teacher');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    dispatch(loginUser({ email, password }))
+    .then((resp)=>{
+      const user = resp.payload.user;
+      if (user.role === 'ADMIN') {
+        navigate('/admin');
+      } else if (user.role === 'STUDENT') {
+        navigate('/student');
+      } else if (user.role === 'TEACHER') {
+        navigate('/teacher');
+      }
+    });
   };
 
   return (
@@ -73,7 +97,8 @@ const Login = () => {
               </Form>
 
               <div className="text-center">
-                <small className="text-muted">Forgot your password?</small>
+                <small className="text-muted">Forgot your password?</small><br />
+                <small className="text-muted">Don't have an account? <Link to={'/register'}>Register here</Link></small>
               </div>
             </Card.Body>
           </Card>

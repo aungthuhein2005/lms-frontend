@@ -9,6 +9,9 @@ import {
   Alert,
 } from "react-bootstrap";
 import logo from "@/assets/logo.png"; // Adjust as needed
+import { useDispatch } from "react-redux";
+import { registerUser } from "../features/auth/authThunk";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -22,16 +25,19 @@ const Register = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const dispatch = useDispatch();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Replace with your actual registration logic
     console.log("Submitted", form);
+     const resultAction = await dispatch(registerUser(form)).unwrap();
     setSuccess("User registered successfully!");
     setError("");
   };
@@ -138,7 +144,7 @@ const Register = () => {
               </Form>
 
               <div className="text-center">
-                <small className="text-muted">Already have an account? Login</small>
+                <small className="text-muted">Already have an account? <Link to={'/login'}>Login</Link></small>
               </div>
             </Card.Body>
           </Card>
