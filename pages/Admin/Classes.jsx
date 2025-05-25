@@ -3,6 +3,7 @@ import Table from 'react-bootstrap/Table';
 import { Button } from 'react-bootstrap';
 import { Modal } from "react-bootstrap";
 import { useState,useEffect } from 'react';
+import { Link } from 'react-router-dom';
 export default function Classes() {
   const [classes, setClasses] = useState([]); 
   const [show, setShow] = useState(false);
@@ -22,7 +23,7 @@ export default function Classes() {
 
   async function addClass() {
     await axios
-      .post("http://localhost:8383/class/create",{name,description})
+      .post("http://localhost:8080/classes/create",{name,description})
       .then((response) => setClasses(prev => [...prev,response.data]));
       setName('');
       setDescription('');
@@ -34,9 +35,8 @@ export default function Classes() {
 
   async function getClasses() {
     await axios
-      .get("http://localhost:8383/class/all")
+      .get("http://localhost:8080/classes/all")
       .then((response) => setClasses(response.data));
-
   }
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function Classes() {
   }
   async function updateClass(updatedClass) {
     await axios
-      .put(`http://localhost:8383/class/update/${updatedClass.id}`,updatedClass)
+      .put(`http://localhost:8080/classes/update/${updatedClass.id}`,updatedClass)
       .then((response) => console.log(response.data));
     setEditStatus(false);
     setEClass({id:"", name: "", description: "",schedule:"" });
@@ -59,16 +59,9 @@ export default function Classes() {
 
   async function deletedClass(id) {
     await axios
-    .delete(`http://localhost:8383/class/delete/${id}`)
+    .delete(`http://localhost:8080/classes/${id}`)
     .then((response)=>console.log(response.data));
     getClasses();    
-  }
-
-  async function detailClass(id) {
-    await axios
-      .get(`http://localhost:8383/class/view/${id}`)
-      .then((response) => setClasses(response.data));
-
   }
 
   return (
@@ -170,12 +163,11 @@ export default function Classes() {
                   >
                     <i className="bx bxs-trash"></i>
                   </button>
-                  <button
-                    className="btn btn-success me-2"
-                    onClick={() => detailClass(classData.id)}
-                  >
-                   <i className="bx bx-detail"></i>
+                  <Link to={`/admin/classes/${classData.id}`}>
+                  <button className="btn btn-success">
+                    <i className="bx bxs-detail"></i>
                   </button>
+                  </Link>
                 </td>
               </tr>
               )
