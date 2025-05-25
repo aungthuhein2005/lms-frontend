@@ -6,10 +6,19 @@ import { useState,useEffect } from 'react';
 export default function Classes() {
   const [classes, setClasses] = useState([]); 
   const [show, setShow] = useState(false);
+  const [show1, setShow1] = useState(false);
+  const [show2, setShow2] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleClose1 = () => setShow1(false);
+  const handleShow1 = () => setShow1(true);
+  const handleClose2 = () => setShow2(false);
+  const handleShow2 = () => setShow2(true);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [eClass, setEClass] = useState({ id: "", name: "", description: "" });
+  const [editStatus, setEditStatus] = useState(false);
+ 
 
   async function addClass() {
     await axios
@@ -34,9 +43,23 @@ export default function Classes() {
     getClasses(); //data from localhost enters response
   }, []);
 
+  function editClass(editedClass) {
+    setEditStatus(true);
+    setEClass(editedClass);
+    console.log(editClass);
+  }
+  async function updateClass(updatedClass) {
+    await axios
+      .put(`http://localhost:8383/class/update/${updatedClass.id}`,updatedClass)
+      .then((response) => console.log(response.data));
+    setEditStatus(false);
+    setEClass({id:"", name: "", description: "",schedule:"" });
+    getClasses();
+  }
+
   async function deletedClass(id) {
     await axios
-    .delete(`http://localhost:8383/class/${id}`)
+    .delete(`http://localhost:8383/class/delete/${id}`)
     .then((response)=>console.log(response.data));
     getClasses();    
   }
@@ -44,7 +67,7 @@ export default function Classes() {
   return (
       <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2>Students</h2>
+        <h2>Classes</h2>
 <button className="btn btn-primary" onClick={() => handleShow()}>
               Add Class
             </button>
@@ -85,7 +108,7 @@ export default function Classes() {
             </Modal>      </div>
       <h5>Total - </h5>
 
-    <Table striped bordered hover>
+      <Table striped bordered hover>
       <thead>
         <tr>
           <th>Class Code</th>
@@ -96,23 +119,62 @@ export default function Classes() {
         </tr>
       </thead>
       <tbody>
-        {classes.map((classes) =>(
-            <tr key={classes.id}>
-              <td>{classes.id}</td>
-              <td>{classes.name}</td>
-              <td>{classes.description}</td>
-              <td>{classes.schedule}</td>
+        {classes.map((classData) =>(
+          editStatus && classData.id == eClass.id ? (
+            <tr key={classData.id}>
+              <td>{classData.id}</td>
               <td>
-                    <Button className="btn btn-primary me-2" size="sm" onClick={()=> editedClass(classes)}><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAZdJREFUSEu11TnPDWEYxvHf2xAlEQpiS+xrKSGWaCQK38BXUGs0GlrfQa0TFWLtJYpX7EFCFAprg3PJfWQyzjJn3vc8zWRmnvlf93LdzyyY81qYM99yCKzAGazCdXxvBt0WOIvL2DUhs184h2tYjVs4VPsXcRifh9+3Bd5iQ0f4moIfxDt8wU48wkn8DKct8Lvg00q3tuD78Qyn8LWeHcB5XO0rsA53sLuCeT64P1ERp1z7cAkX+wisx+2Cv6+otyOl/YYd+IhklutMJQr8IbZVzY+UYyK4p7JJL44NTPBiXJPH9SCNv9uCvy4X3cPehmie/1tdmhz4A2xuQWLRITzQ48j19MCqN7tm0BWecqU8gWfYMnR/17QMXmIL3lSEr9C2aBwUeNYPrGxypwkMe7KxIIHHoqn502roh0bJ/+thV4HsC/x+TWuOhNS8CY9Ob4GmMQI/ik8jjpQlCzypqR0F75XBhHNv5KuZM1h2gQzKplmprf2x8tZxc5AfzpVySh+dx4NT9QJujBPoA534zbQfy5IF5y7wB1dYahkZIgF+AAAAAElFTkSuQmCC"/></Button>
-                    <Button className="btn btn-danger me-2" size="sm" onClick={()=> deletedClass(classes.id)}><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAKVJREFUSEvtlbERgzAMRZ8LNqFKVmAMhmAI+oyQyw6ZIQPQwx2zUJBzkcA5CAkfTgMubfk/6duWHYmHS6yPBVABdyERv/ZYS1IDFMALyASRAfAxjQQJAeNOln11/w7YqYBJRjqDWKt+9I4B+FQZ2rY0H2XRCVi8+nO/T4sOYNGWBmh+aC1w2aIMdMA13CM1uxK4AbkR0gM18LQCjLp6mPYn6wpKxBs0qysZAkh0fgAAAABJRU5ErkJggg=="/></Button>
-                    <Button className="btn btn-success me-2" size="sm"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAKVJREFUSEu9lUEKwjAQRV/PIRSkC71NL+PGG7QX8iDddCcteA8l0EAMKRkcf7NN5r/8zyTTIF6NWJ9DAT0wAFenqxm4AY+gkzp4ASeneCx/Al0OeG+73ti+dFKxwwERaE0tXtbsQA6w3jw/Z3YgB8gjkgPkEckBexHVXrq5i+QAeUR/B6xA+6tqVrcA5/y7DgNnBC5OyATcSwPHqVsur7WcGyoHfAC5wCwZkHEBmwAAAABJRU5ErkJggg=="/></Button>
+              <input type='text' value={eClass.name} onChange={(e)=> setEClass({...eClass,name:e.target.value})} className='form-control'/>
               </td>
-        </tr>
-        ))}
-        
-      </tbody>
-    </Table>
-    </div>
-    
-  )
+              <td>
+                <input type='text' value={eClass.description} onChange={(e)=> setEClass({...eClass,description:e.target.value})} className='form-control'/>
+              </td>
+              <td>
+                  <button
+                    className="btn btn-warning me-2"
+                    onClick={() => updateClass(eClass)}
+                  >
+                    <i className="bx  bx-save"></i>
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => deletedClass(classData.id)}
+                  >
+                    <i className="bx bxs-trash"></i>
+                  </button>
+                </td>
+              </tr>):
+              (
+              <tr key={classData.id}>
+              <td>{classData.id}</td>
+              <td>{classData.name}</td>
+              <td>{classData.description}</td>
+              <td>{classData.schedule}</td>
+              <td>
+                  <button
+                    className="btn btn-warning me-2"
+                    onClick={() => editClass(classData)}
+                  >
+                    <i className="bx bxs-edit-alt"></i>
+                  </button>
+                  <button
+                    className="btn btn-danger me-2"
+                    onClick={() => deletedClass(classData.id)}
+                  >
+                    <i className="bx bxs-trash"></i>
+                  </button>
+                  <button
+                    className="btn btn-success me-2"
+                    onClick={() => detailClass(course.id)}
+                  >
+                   <i className="bx bx-detail"></i>
+                  </button>
+                </td>
+              </tr>
+              )
+            ))}
+          </tbody>
+          </Table>
+          </div>
+  )          
 }
