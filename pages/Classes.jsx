@@ -64,6 +64,13 @@ export default function Classes() {
     getClasses();    
   }
 
+  async function detailClass(id) {
+    await axios
+      .get(`http://localhost:8383/class/view/${id}`)
+      .then((response) => setClasses(response.data));
+
+  }
+
   return (
       <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -165,7 +172,7 @@ export default function Classes() {
                   </button>
                   <button
                     className="btn btn-success me-2"
-                    onClick={() => detailClass(course.id)}
+                    onClick={() => detailClass(classData.id)}
                   >
                    <i className="bx bx-detail"></i>
                   </button>
