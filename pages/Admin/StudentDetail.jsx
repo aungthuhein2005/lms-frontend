@@ -3,20 +3,26 @@ import { Card, Row, Col, ListGroup, Image } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 // import student_profile from "@/assets/images/student.avif";
 import admin_image from '@/assets/teacher-profile.jpg';
-import { useGetStudentByIdQuery } from "../../features/api/apiSlice";
+import { useGetAssignedClassesQuery, useGetStudentByIdQuery } from "../../features/api/studentApiSlice";
+import StudentEnrollClasses from "../../components/StudentEnrollClasses";
 
 const StudentDetail = () => {
   
   const {id} = useParams();
   
   const { data: student, isLoading, error } = useGetStudentByIdQuery(id);
+  const { data: classes,isLoading: isClassesLoading,error: classesError } = useGetAssignedClassesQuery(id);
+  if(isClassesLoading) return <p>Loading</p>
+  if(classesError) return <p>{classesError.message}</p>
+  
 
   if(isLoading) return <p>Loading</p>
   if(error) return <p>{error.message}</p>
   
 
   return (
-    <Card className="mt-4">
+    <>
+      <Card className="my-4">
       <Card.Header as="h5" className="">
         Student Detail
       </Card.Header>
@@ -43,6 +49,8 @@ const StudentDetail = () => {
         </Row>
       </Card.Body>
     </Card>
+    <StudentEnrollClasses data={classes} />
+    </>
   );
 };
 

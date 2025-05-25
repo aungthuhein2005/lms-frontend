@@ -2,12 +2,15 @@ import React from 'react';
 import { Card, Row, Col, Button, ListGroup, Image, Table } from 'react-bootstrap';
 import admin from '@/assets/teacher-profile.jpg';
 import { useSelector } from 'react-redux';
+import { useGetAssignedClassesQuery } from '../../features/api/studentApiSlice';
+import StudentEnrollClasses from '../../components/StudentEnrollClasses';
 
 export default function Profile() {
 
   const student = useSelector((state)=>state.auth.user);
+  const { data: classes,isLoading: isClassesLoading,error: classesError } = useGetAssignedClassesQuery(student.id);
 
-  console.log(student);
+  // console.log(student);
   
   
   // const student = {
@@ -79,31 +82,7 @@ export default function Profile() {
       </Card>
 
       {/* Classes Section */}
-      <Card className="shadow-sm">
-        <Card.Header><strong>Enrolled Classes</strong></Card.Header>
-        <Card.Body>
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th>Subject</th>
-                <th>Teacher</th>
-                <th>Timetable</th>
-              </tr>
-            </thead>
-            <tbody>
-              {student?.classes?.map((cls, idx) => (
-                <tr key={idx}>
-                  <td>{cls.name}</td>
-                  <td>{cls.subject}</td>
-                  <td>{cls.teacher}</td>
-                  <td><a href={cls.timetableLink}>View</a></td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+      <StudentEnrollClasses data={classes} />
     </div>
   );
 }

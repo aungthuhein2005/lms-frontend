@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import CustomAlert from '../../components/Alert';
 import { useDispatch } from 'react-redux';
 import { showAlert } from '../../features/ui/alertSlice';
 

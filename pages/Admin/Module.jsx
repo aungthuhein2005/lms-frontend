@@ -1,77 +1,106 @@
+// Module.jsx (Parent Component)
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Modal, Card, Container, Row, Col, Accordion } from "react-bootstrap";
+import { Button, Container, Row, Col, Accordion, Card } from "react-bootstrap";
+import { useDropzone } from "react-dropzone";
+
+// Import the new components
+import LessonCard from "../../components/LessonCard";
+import LessonModals from "../../components/LessonModals";
+import ModuleModals from "../../components/ModuleModals";
 
 const Module = () => {
   const { courseId } = useParams();
   const [modules, setModules] = useState([]);
-  const [course, setCourse] = useState([]);
+  const [course, setCourse] = useState({});
   const [selectedModuleId, setSelectedModuleId] = useState(null);
+
+  // Module state
   const [showAddModule, setShowAddModule] = useState(false);
   const [showEditModule, setShowEditModule] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [lesson, setLesson] = useState([]);
-  const [eModule, setEModule] = useState({
-    id: "",
-    name: "",
-    description: "",
-  });
-  const [showAddLesson, setShowAddLesson] = useState(false);
-  const [title, setTitle] = useState("");
-  const [media, setMedia] = useState("");
-  const [eLesson, setELesson] = useState({
-    id: "",
-    title: "",
-    media: "",
-  });
-  const [editStatus, setEditStatus] = useState(false);
-  function editLesson(editedlesson) {
-    setEditStatus(true);
-    setELesson(editedlesson);
-  }
+  const [moduleName, setModuleName] = useState("");
+  const [moduleDescription, setModuleDescription] = useState("");
+  const [eModule, setEModule] = useState({ id: "", name: "", description: "" });
 
-  const handleAddShow = () => {
-    setName("");
-    setDescription("");
+  // Lesson state
+  const [lessonsByModule, setLessonsByModule] = useState({}); // Renamed for clarity
+  const [showAddLesson, setShowAddLesson] = useState(false);
+  const [eLesson, setELesson] = useState({ id: "", title: "", description: "", media: null, mediaPreview: "" }); // Added description, media, mediaPreview
+  const [editStatus, setEditStatus] = useState(false);
+
+
+  // --- Module Handlers ---
+  const handleAddModuleShow = () => {
+    setModuleName("");
+    setModuleDescription("");
     setShowAddModule(true);
   };
-  const handleAddClose = () => setShowAddModule(false);
-  const handleEditShow = (module) => {
+  const handleAddModuleClose = () => setShowAddModule(false);
+
+  const handleEditModuleShow = (module) => {
     setEModule(module);
-    setName(module.name);
-    setDescription(module.description);
+    setModuleName(module.name);
+    setModuleDescription(module.description);
     setShowEditModule(true);
   };
-  const handleEditClose = () => setShowEditModule(false);
+  const handleEditModuleClose = () => setShowEditModule(false);
 
-  const AddLessonShow = (moduleId) => {
-    setTitle("");
-      setSelectedModuleId(moduleId);
-    setMedia("");
+  // --- Lesson Handlers ---
+  const handleAddLessonShow = (moduleId) => {
+    setELesson({ id: "", title: "", description: "", media: null, mediaPreview: "" });
+    setSelectedModuleId(moduleId);
     setShowAddLesson(true);
   };
-  const AddLessonClose = () => setShowAddLesson(false);
+  const handleAddLessonClose = () => setShowAddLesson(false);
+
+  const editLesson = (lessonToEdit) => {
+    setEditStatus(true);
+    setELesson(lessonToEdit);
+  };
+
+  const onDrop = useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
+    setELesson((prevELesson) => ({
+      ...prevELesson,
+      media: file,
+      mediaPreview: URL.createObjectURL(file),
+    }));
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'video/*': [],
+      'image/*': [],
+      'application/pdf': [],
+      'text/plain': []
+    }
+  });
+
+
+  // --- API Calls ---
 
   useEffect(() => {
     const fetchCourseAndModules = async () => {
-      const courseResponse = await axios.get(
-        `http://localhost:8080/courses/view/${courseId}`
-      );
-      console.log(courseResponse.data);
-      setCourse(courseResponse.data);
+      try {
+        const courseResponse = await axios.get(
+          `http://localhost:8080/courses/view/${courseId}`
+        );
+        setCourse(courseResponse.data);
 
-      const modulesResponse = await axios.get(
-        `http://localhost:8080/courses/${courseId}/modules`
-      );
-      setModules(modulesResponse.data);
+        const modulesResponse = await axios.get(
+          `http://localhost:8080/courses/${courseId}/modules`
+        );
+        setModules(modulesResponse.data);
+      } catch (error) {
+        console.error("Error fetching course or modules:", error);
+      }
     };
     fetchCourseAndModules();
   }, [courseId]);
 
   const fetchLessons = async (moduleId) => {
-    console.log("Fetching lessons for moduleId:", moduleId);
     if (!moduleId) {
       console.error("moduleId is undefined!");
       return;
@@ -80,19 +109,21 @@ const Module = () => {
       const response = await axios.get(
         `http://localhost:8080/lessons/module/${moduleId}`
       );
-      setLesson((prev) => ({
+      setLessonsByModule((prev) => ({
         ...prev,
         [moduleId]: response.data,
       }));
     } catch (error) {
-      console.error("Error fetching lessons:", error);
+      console.error(`Error fetching lessons for module ${moduleId}:`, error);
     }
   };
+
   useEffect(() => {
     if (modules.length > 0) {
       modules.forEach((module) => fetchLessons(module.id));
     }
   }, [modules]);
+
 
   async function getModulesByCourseId(courseId) {
     const response = await axios.get(
@@ -100,14 +131,15 @@ const Module = () => {
     );
     setModules(response.data);
   }
+
   async function addModule(new_module) {
     await axios
       .post(`http://localhost:8080/modules/courses/${courseId}`, new_module)
       .then((response) => console.log(response.data));
     await getModulesByCourseId(courseId);
-    setShowAddModule(false);
-    setEModule({ id: "", name: "", description: "" });
+    handleAddModuleClose();
   }
+
   async function updateModule(updatedModule) {
     await axios
       .put(
@@ -116,245 +148,181 @@ const Module = () => {
       )
       .then((response) => console.log(response.data));
     await getModulesByCourseId(courseId);
-    setShowEditModule(false);
-    setEditStatus(false);
+    handleEditModuleClose();
     setEModule({ id: "", name: "", description: "" });
   }
-  async function deletedModule(moduleId) {
+
+  async function deleteModule(moduleId) {
     axios.delete(`http://localhost:8080/modules/${moduleId}`);
     await getModulesByCourseId(courseId);
   }
 
-  async function addLesson(new_lesson) {
+  async function uploadMedia(file) {
     try {
-      const payload = {
-        title: new_lesson.title,
-        media: new_lesson.media,
-        module: {
-          id: new_lesson.moduleId,
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post(`http://localhost:8080/media/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      };
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Media upload failed:", error);
+      return null;
+    }
+  }
+
+  const handleAddLesson = async () => {
+    let uploadMediaResult = {};
+
+    if (eLesson.media instanceof File) {
+      const result = await uploadMedia(eLesson.media);
+      if (result) {
+        uploadMediaResult.mediaURL = result.mediaURL;
+        uploadMediaResult.mediaFileName = result.mediaFilename;
+        uploadMediaResult.mediaType = result.mediaType;
+      }
+    }
+
+    const newLessonPayload = {
+      title: eLesson.title,
+      description: eLesson.description,
+      mediaURL: uploadMediaResult.mediaURL || "",
+      mediaType: uploadMediaResult.mediaType || "",
+      meidaFileName: uploadMediaResult.mediaFileName || "unknown",
+      examId: null, // You might need to add inputs for these
+      assignmentId: null, // You might need to add inputs for these
+      module: {
+        id: selectedModuleId,
+      },
+    };
+
+    await createLesson(newLessonPayload);
+  };
+
+  async function createLesson(new_lesson_payload) {
+    try {
       const response = await axios.post(
-        `http://localhost:8080/lessons/create`,
-        payload,
+        "http://localhost:8080/lessons/create",
+        new_lesson_payload,
         {
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      console.log(response.data);
       setShowAddLesson(false);
-      setELesson({ id: "", title: "", media: "" });
-      fetchLessons(new_lesson.moduleId);
+      setELesson({ id: "", title: "", description: "", media: null, mediaPreview: "" });
+      fetchLessons(new_lesson_payload.module.id);
     } catch (error) {
-      console.error(
-        "Error creating lesson:",
-        error.response?.data || error.message
-      );
+      console.error("Error creating lesson:", error.response?.data || error.message);
     }
   }
 
-  async function deletedLesson(lessonId, moduleId) {
+  async function deleteLesson(lessonId, moduleId) {
     await axios.delete(`http://localhost:8080/lessons/${lessonId}`);
     fetchLessons(moduleId);
   }
 
   async function updateLesson(lessonId, updatedlesson) {
+    // This part might need adjustment if you want to handle media updates for lessons
     await axios
       .put(`http://localhost:8080/lessons/${lessonId}`, updatedlesson)
       .then((response) => console.log(response.data));
-    fetchLessons(lessonId);
+    fetchLessons(selectedModuleId); // Re-fetch lessons for the active module
     setEditStatus(false);
-    setELesson({ id: "", title: "", media: "" });
+    setELesson({ id: "", title: "", description: "", media: null, mediaPreview: "" });
   }
 
+  return (
+    <>
+      <Container className="py-4">
+        <Row className="mb-4 align-items-center justify-content-between">
+          <Col>
+            <h3>{course.title}</h3>
+            <p className="text-muted">{course.description}</p>
+          </Col>
+          <Col className="text-end">
+            <Button variant="primary" onClick={handleAddModuleShow}>
+              <i className="bx bx-message-square-add me-2"></i>Add Module
+            </Button>
+          </Col>
+        </Row>
 
-return (
-  <>
-    <Container className="py-4">
-      <Row className="mb-4 align-items-center justify-content-between">
-        <Col>
-          <h3>{course.title}</h3>
-          <p className="text-muted">{course.description}</p>
-        </Col>
-        <Col className="text-end">
-          <Button variant="primary" onClick={handleAddShow}>
-            <i className="bx bx-message-square-add me-2"></i>Add Module
-          </Button>
-        </Col>
-      </Row>
+        <Accordion alwaysOpen>
+          {modules.map((module, idx) => (
+            <Accordion.Item eventKey={String(idx)} key={module.id} className="mb-3">
+              <Accordion.Header>
+                <div>
+                  <h5 className="mb-1">{module.name}</h5>
+                  <small className="text-muted">{module.description}</small>
+                </div>
+              </Accordion.Header>
+              <Accordion.Body>
+                <Row className="mb-3 justify-content-end">
+                  <Col xs="auto">
+                    <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
+                      <i className="bx bx-message-square-add me-2"></i>Add Lesson
+                    </Button>
+                  </Col>
+                </Row>
 
-      <Accordion alwaysOpen>
-        {modules.map((module, idx) => (
-          <Accordion.Item eventKey={String(idx)} key={module.id} className="mb-3">
-            <Accordion.Header>
-              <div>
-                <h5 className="mb-1">{module.name}</h5>
-                <small className="text-muted">{module.description}</small>
-              </div>
-            </Accordion.Header>
-            <Accordion.Body>
-              <Row className="mb-3 justify-content-end">
-                <Col xs="auto">
-                  <Button variant="primary" onClick={()=>AddLessonShow(module.id)}>
-                    <i className="bx bx-message-square-add me-2"></i>Add Lesson
+                {(lessonsByModule[module.id] || []).map((lessonItem) => (
+                  <LessonCard
+                    key={lessonItem.id}
+                    lessonItem={lessonItem}
+                    editStatus={editStatus}
+                    eLesson={eLesson}
+                    setELesson={setELesson}
+                    updateLesson={updateLesson}
+                    deleteLesson={deleteLesson}
+                    editLesson={editLesson}
+                    moduleId={module.id}
+                  />
+                ))}
+
+                <div className="d-flex justify-content-end">
+                  <Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
+                    <i className="bx bxs-edit-alt"></i>
                   </Button>
-                </Col>
-              </Row>
+                  <Button variant="outline-danger" onClick={() => deleteModule(module.id)}>
+                    <i className="bx bxs-trash"></i>
+                  </Button>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      </Container>
 
-              {(lesson[module.id] || []).map((lessonItem) =>
-                editStatus && lessonItem.id === eLesson.id ? (
-                  <Card key={lessonItem.id} className="mb-3">
-                    <Card.Body>
-                      <input
-                        type="text"
-                        className="form-control mb-2"
-                        value={eLesson.title}
-                        onChange={(e) => setELesson({ ...eLesson, title: e.target.value })}
-                        placeholder="Lesson Title"
-                      />
-                      <input
-                        type="text"
-                        className="form-control mb-3"
-                        value={eLesson.media}
-                        onChange={(e) => setELesson({ ...eLesson, media: e.target.value })}
-                        placeholder="Media"
-                      />
-                      <div className="d-flex justify-content-end">
-                        <Button variant="success" className="me-2" onClick={() => updateLesson(lessonItem.id, eLesson)}>
-                          <i className="bx bx-save"></i>
-                        </Button>
-                        <Button variant="danger" onClick={() => deletedLesson(lessonItem.id, module.id)}>
-                          <i className="bx bxs-trash"></i>
-                        </Button>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                ) : (
-                  <Card key={lessonItem.id} className="mb-3">
-                    <Card.Body>
-                      <Card.Title>{lessonItem.title}</Card.Title>
-                      <Card.Text>Media: {lessonItem.media}</Card.Text>
-                      <div className="d-flex justify-content-end">
-                        <Button variant="outline-primary" className="me-2" onClick={() => editLesson(lessonItem)}>
-                          <i className="bx bxs-edit-alt"></i>
-                        </Button>
-                        <Button variant="outline-danger" onClick={() => deletedLesson(lessonItem.id, module.id)}>
-                          <i className="bx bxs-trash"></i>
-                        </Button>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                )
-              )}
+      <ModuleModals
+        showAddModule={showAddModule}
+        handleAddClose={handleAddModuleClose}
+        moduleName={moduleName}
+        setModuleName={setModuleName}
+        moduleDescription={moduleDescription}
+        setModuleDescription={setModuleDescription}
+        addModule={addModule}
+        showEditModule={showEditModule}
+        handleEditClose={handleEditModuleClose}
+        eModule={eModule}
+        updateModule={updateModule}
+      />
 
-              <div className="d-flex justify-content-end">
-                <Button variant="outline-secondary" className="me-2" onClick={() => handleEditShow(module)}>
-                  <i className="bx bxs-edit-alt"></i>
-                </Button>
-                <Button variant="outline-danger" onClick={() => deletedModule(module.id)}>
-                  <i className="bx bxs-trash"></i>
-                </Button>
-              </div>
-            </Accordion.Body>
-          </Accordion.Item>
-        ))}
-      </Accordion>
-    </Container>
-
-    {/* Add Module Modal */}
-    <Modal show={showAddModule} onHide={handleAddClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Add Module</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <input
-          type="text"
-          className="form-control mb-3"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Module Name"
-        />
-        <input
-          type="text"
-          className="form-control"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Module Description"
-        />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleAddClose}>Close</Button>
-        <Button variant="success" onClick={() => addModule({ name, description })}>
-          <i className="bx bx-save"></i> Save
-        </Button>
-      </Modal.Footer>
-    </Modal>
-
-    {/* Edit Module Modal */}
-    <Modal show={showEditModule} onHide={handleEditClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Edit Module</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <input
-          type="text"
-          className="form-control mb-3"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Module Name"
-        />
-        <input
-          type="text"
-          className="form-control"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Module Description"
-        />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleEditClose}>Close</Button>
-        <Button variant="success" onClick={() => updateModule({ id: eModule.id, name, description })}>
-          <i className="bx bx-save"></i> Update
-        </Button>
-      </Modal.Footer>
-    </Modal>
-
-    {/* Add Lesson Modal */}
-    <Modal show={showAddLesson} onHide={AddLessonClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Add Lesson</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <input
-          type="text"
-          className="form-control mb-3"
-          value={eLesson.title}
-          onChange={(e) => setELesson({ ...eLesson, title: e.target.value })}
-          placeholder="Lesson Title"
-        />
-        <input
-          type="text"
-          className="form-control"
-          value={eLesson.media}
-          onChange={(e) => setELesson({ ...eLesson, media: e.target.value })}
-          placeholder="Media URL"
-        />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={AddLessonClose}>Close</Button>
-        <Button
-          variant="success"
-          onClick={() => addLesson({ title: eLesson.title, media: eLesson.media, moduleId: selectedModuleId })} // Ensure selectedModuleId is defined
-        >
-          <i className="bx bx-save"></i> Save
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  </>
-);
-
+      <LessonModals
+        showAddLesson={showAddLesson}
+        handleAddLessonClose={handleAddLessonClose}
+        eLesson={eLesson}
+        setELesson={setELesson}
+        handleAddLesson={handleAddLesson}
+        getRootProps={getRootProps}
+        getInputProps={getInputProps}
+        isDragActive={isDragActive}
+      />
+    </>
+  );
 };
 
 export default Module;

@@ -14,6 +14,8 @@ import Users from '../pages/Admin/Users';
 import TeachersAttendance from '../pages/Admin/TeachersAttendance';
 import Report from '../pages/Admin/Report';
 import Module from '../pages/Admin/Module';
+import UserCreate from '../pages/Admin/UserCreate';
+import TeacherDetail from '../pages/Admin/TeacherDetail';
 
 const AdminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -23,10 +25,12 @@ const AdminRoutes = (
     <Route path="students/:id" element={<StudentDetail />} />
     <Route path="teachers" element={<Teachers />} />
     <Route path="teachers/create" element={<TeacherCreate />} />
+    <Route path="teachers/:id" element={<TeacherDetail />} />
     <Route path="classes" element={<Classes />} />
     <Route path="courses" element={<Courses />} />
     <Route path="courses/:courseId/modules" element={<Module />}/>
     <Route path="users" element={<Users />} />
+    <Route path="users/create" element={<UserCreate />} />
     <Route path="teachers_attendance" element={<TeachersAttendance />} />
     <Route path="report" element={<Report />} />
   </Route>

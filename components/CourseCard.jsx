@@ -7,7 +7,7 @@ export default function CourseCard({title,description}) {
       <Card.Img variant="top" src="https://placehold.co/600x300" />
       <Card.Body>
         <Card.Title>{title}</Card.Title>
-        <Card.Text>
+        <Card.Text className='text-muted'>
             {description}
         </Card.Text>
         <Button variant="primary">View</Button>

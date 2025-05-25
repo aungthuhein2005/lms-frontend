@@ -3,16 +3,32 @@ import uiSlice from "../features/ui/uiSlice";
 import { apiSlice } from "../features/api/apiSlice";
 import alertReducer from "../features/ui/alertSlice";
 import authReducer from "../features/auth/authSlice";
+import { studentApiSlice } from "../features/api/studentApiSlice";
+import { classApiSlice } from "../features/api/classApiSlice";
+import { userApiSlice } from "../features/api/userApiSlice";
+import confirmReducer from "../features/ui/confirmSlice";
+import { teacherApiSlice } from "../features/api/teacherApiSlice";
 
 const store = configureStore({
     reducer: {
        ui: uiSlice,
        alert: alertReducer,
        auth: authReducer,
+       confirm: confirmReducer,
        [apiSlice.reducerPath]: apiSlice.reducer,
+       [studentApiSlice.reducerPath]: studentApiSlice.reducer,
+       [classApiSlice.reducerPath]: classApiSlice.reducer,
+       [userApiSlice.reducerPath]: userApiSlice.reducer,
+       [teacherApiSlice.reducerPath]: teacherApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(apiSlice.middleware),
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }).concat(apiSlice.middleware)
+    .concat(userApiSlice.middleware)
+    .concat(studentApiSlice.middleware)
+    .concat(classApiSlice.middleware)
+    .concat(teacherApiSlice.middleware),
 });
 
 export default store;
