@@ -23,6 +23,7 @@ import { showAlert } from '../../features/ui/alertSlice'
     const [assignToClass] = useAssignToClassMutation()
     const [selectedStudentId, setSelectedStudentId] = useState("");
     const [selectedClass, setSelectedClass] = useState("");
+    const [enrollDate, setEnrollDate] = useState(DateHelper.formatYMD(new Date()));
 
     const [editModalOpen, setEditModalOpen] = useState(false);
 const [editingStudent, setEditingStudent] = useState(null);
@@ -76,9 +77,8 @@ const [editingStudent, setEditingStudent] = useState(null);
 
     const handleAssignToClass = async (e) => {
       e.preventDefault()
-      console.log(selectedStudentId, selectedClass);
       
-      const resp = await assignToClass({studentId:selectedStudentId,classId:selectedClass});
+      const resp = await assignToClass({studentId:selectedStudentId,classId:selectedClass, enrolled_at: enrollDate}).unwrap();
       console.log(resp);
       
     }
@@ -111,6 +111,16 @@ const [editingStudent, setEditingStudent] = useState(null);
                   </option>
                 ))}
               </Form.Select>
+            </Form.Group>
+            
+            <Form.Group className="mb-3" controlId="formBasicEnrolleDate">
+              <Form.Label>Enrolled At</Form.Label>
+              <Form.Control
+                type="date"
+                value={enrollDate}
+                onChange={(e) => setEnrollDate(e.target.value)}
+                
+              />
             </Form.Group>
 
             <Button variant="primary"  onClick={(e)=>handleAssignToClass(e)}>

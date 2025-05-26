@@ -11,6 +11,7 @@ export default function AdminLayout() {
         { name: 'Dashboard', path: '/admin', icon: <i className="bx bxs-dashboard" style={{ fontSize: 20 }}></i> },
         { name: 'Users', path: '/admin/users', icon: <i className="bx bxs-group" style={{ fontSize: 20 }}></i> },
         { name: 'Teachers', path: '/admin/teachers', icon: <i className="bx bxs-book-reader" style={{ fontSize: 20 }}></i> },
+        { name: 'Academic Years', path: '/admin/academic_year', icon: <i className="bx bxs-calendar" style={{ fontSize: 20 }}></i> },
         { name: 'Courses', path: '/admin/courses', icon: <i className="bx bxs-book-alt" style={{ fontSize: 20 }}></i> },
         { name: 'Students', path: '/admin/students', icon: <i className='bx bx-male-female' style={{ fontSize: 20 }}></i> },
         { name: 'Classes', path: '/admin/classes', icon: <i className="bx bxs-directions" style={{ fontSize: 20 }}></i> },

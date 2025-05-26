@@ -17,6 +17,8 @@ import Module from '../pages/Admin/Module';
 import UserCreate from '../pages/Admin/UserCreate';
 import TeacherDetail from '../pages/Admin/TeacherDetail';
 import ClassDetail from '../components/ClassDetail';
+import AcademicYear from '../pages/Admin/AcademicYear';
+import AcademicYearDetail from '../pages/Admin/AcademicYearDetail';
 
 const AdminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -24,6 +26,8 @@ const AdminRoutes = (
     <Route path="students" element={<Students />} />
     <Route path="students/create" element={<StudentCreate />} />
     <Route path="students/:id" element={<StudentDetail />} />
+    <Route path="academic_year" element={<AcademicYear/>}/>
+    <Route path="academic_year/:id" element={<AcademicYearDetail/>}/>
     <Route path="teachers" element={<Teachers />} />
     <Route path="teachers/create" element={<TeacherCreate />} />
     <Route path="teachers/:id" element={<TeacherDetail />} />

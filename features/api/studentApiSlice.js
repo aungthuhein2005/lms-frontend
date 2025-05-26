@@ -39,10 +39,10 @@ export const studentApiSlice = createApi({
             }),
         }),
         assignToClass: builder.mutation({
-            query: ({ studentId, classId }) => ({
+            query: ({ studentId, classId,enrolled_at }) => ({
                 url: `/students/assign_to_class`,
                 method: "POST",
-                body: { studentId, classId },
+                body: { studentId, classId,enrolled_at },
             }),
         }),
         getAssignedClasses: builder.query({

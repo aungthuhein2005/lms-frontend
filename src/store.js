@@ -8,6 +8,7 @@ import { classApiSlice } from "../features/api/classApiSlice";
 import { userApiSlice } from "../features/api/userApiSlice";
 import confirmReducer from "../features/ui/confirmSlice";
 import { teacherApiSlice } from "../features/api/teacherApiSlice";
+import { academicYearApiSlice } from "../features/api/academicYearApiSlice";
 
 const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
        [classApiSlice.reducerPath]: classApiSlice.reducer,
        [userApiSlice.reducerPath]: userApiSlice.reducer,
        [teacherApiSlice.reducerPath]: teacherApiSlice.reducer,
+       [academicYearApiSlice.reducerPath]: academicYearApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -28,7 +30,8 @@ const store = configureStore({
     .concat(userApiSlice.middleware)
     .concat(studentApiSlice.middleware)
     .concat(classApiSlice.middleware)
-    .concat(teacherApiSlice.middleware),
+    .concat(teacherApiSlice.middleware)
+    .concat(academicYearApiSlice.middleware),
 });
 
 export default store;

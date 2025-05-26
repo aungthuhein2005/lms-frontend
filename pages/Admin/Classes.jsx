@@ -15,8 +15,18 @@ export default function Classes() {
   const handleShow1 = () => setShow1(true);
   const handleClose2 = () => setShow2(false);
   const handleShow2 = () => setShow2(true);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+const [name, setName] = useState("");
+const [description, setDescription] = useState("");
+const [schedule, setSchedule] = useState("");
+const [selectedSemesterId, setSelectedSemesterId] = useState("");
+const [selectedCourseId, setSelectedCourseId] = useState("");
+const [selectedTeacherId, setSelectedTeacherId] = useState("");
+
+// Also make sure these are fetched from backend
+const [semesters, setSemesters] = useState([]);
+const [courses, setCourses] = useState([]);
+const [teachers, setTeachers] = useState([]);
+
   const [eClass, setEClass] = useState({ id: "", name: "", description: "" });
   const [editStatus, setEditStatus] = useState(false);
  
@@ -71,43 +81,99 @@ export default function Classes() {
 <button className="btn btn-primary" onClick={() => handleShow()}>
               Add Class
             </button>
-            <Modal show={show} onHide={handleClose}>
-              <Modal.Header closeButton>
-                <Modal.Title>AddClass</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <form action="">
-                  <div className="mt-3">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter Class Name"
-                    />
-                  </div>
-                  <div className="mt-3">
-                    <input
-                      type="email"
-                      className="form-control"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Enter Description"
-                    />
-                  </div>
-                </form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                  Close
-                </Button>
-                <Button variant="primary" onClick={() => addClass()}>
-                  Save Changes
-                </Button>
-              </Modal.Footer>
-            </Modal>      </div>
-      <h5>Total - </h5>
 
+      </div>
+      <h5>Total - </h5>
+            <Modal show={show} onHide={handleClose}>
+  <Modal.Header closeButton>
+    <Modal.Title>Add Class</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <form>
+      <div className="mt-3">
+        <input
+          type="text"
+          className="form-control"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter Class Name"
+        />
+      </div>
+
+      <div className="mt-3">
+        <textarea
+          className="form-control"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter Description"
+        />
+      </div>
+
+      <div className="mt-3">
+        <input
+          type="text"
+          className="form-control"
+          value={schedule}
+          onChange={(e) => setSchedule(e.target.value)}
+          placeholder="Enter Schedule (e.g., Mon-Wed 9:00-11:00)"
+        />
+      </div>
+
+      <div className="mt-3">
+        <select
+          className="form-select"
+          value={selectedSemesterId}
+          onChange={(e) => setSelectedSemesterId(e.target.value)}
+        >
+          <option value="">Select Semester</option>
+          {semesters.map((sem) => (
+            <option key={sem.id} value={sem.id}>
+              {sem.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mt-3">
+        <select
+          className="form-select"
+          value={selectedCourseId}
+          onChange={(e) => setSelectedCourseId(e.target.value)}
+        >
+          <option value="">Select Course</option>
+          {courses.map((course) => (
+            <option key={course.id} value={course.id}>
+              {course.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mt-3">
+        <select
+          className="form-select"
+          value={selectedTeacherId}
+          onChange={(e) => setSelectedTeacherId(e.target.value)}
+        >
+          <option value="">Select Teacher</option>
+          {teachers.map((teacher) => (
+            <option key={teacher.id} value={teacher.id}>
+              {teacher.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleClose}>
+      Close
+    </Button>
+    <Button variant="primary" onClick={addClass}>
+      Save Changes
+    </Button>
+  </Modal.Footer>
+</Modal>
       <Table striped bordered hover>
       <thead>
         <tr>
