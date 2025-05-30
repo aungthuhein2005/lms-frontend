@@ -4,6 +4,7 @@ import {Table,Button} from 'react-bootstrap';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
+  const [editStatus,setEditStatus] = useState(false)
 
   const fetchUsers = async() => {
     const respone = await axios.get('http://localhost:8080/users')
@@ -17,6 +18,12 @@ export default function Users() {
     .then(response=>console.log(response.data))
     fetchUsers()
   }
+
+  // async function createUser(editedUser) {
+  //  console.log(editedUser)
+  //   setEditStatus(true)
+  //   setEuser(editedUser)
+  // }
 
  useEffect (()=>{
     fetchUsers()
@@ -64,7 +71,7 @@ export default function Users() {
                 <td>{user.gender}</td>
                 <td>{user.dob}</td>
                 <td className='d-flex'>
-                  <Button variant="success" size="sm" className="me-2" onClick={() => handleEdit(user)}>
+                  <Button variant="success" size="sm" className="me-2" onClick={() => createUser(user)}>
                     <i className='bx bxs-edit-alt'></i>
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => deleteUser(user.id)}>

@@ -29,12 +29,16 @@ function App() {
             {AdminRoutes}
             {StudentRoutes}
             {TeacherRoutes}
+            
             {/* Redirect unknown routes to a dashboard or something */}
             {/* <Route path="*" element={<Navigate to="/admin" replace />} /> */}
           </>
         )}
       </Routes>
+        
+
     </Router>
+    
   );
 }
 
