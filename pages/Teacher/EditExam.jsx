@@ -1,0 +1,169 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const EditExam = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [exam, setExam] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    score: 0,
+  });
+
+  const [questions, setQuestions] = useState([]);
+
+  useEffect(() => {
+    const fetchExam = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/exams/${id}`);
+        setExam({
+          title: response.data.title,
+          description: response.data.description,
+          duration: response.data.duration,
+          score: response.data.score,
+        });
+
+        const fetchedQuestions = response.data.questions.map((q) => ({
+          ...q,
+          options: q.options || [],
+        }));
+        setQuestions(fetchedQuestions);
+      } catch (error) {
+        console.error("Error fetching exam:", error);
+      }
+    };
+
+    fetchExam();
+  }, [id]);
+
+  const handleInputChange = (e) => {
+    setExam({
+      ...exam,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleQuestionChange = (index, e) => {
+    const newQuestions = [...questions];
+    newQuestions[index][e.target.name] = e.target.value;
+    setQuestions(newQuestions);
+  };
+
+  const handleOptionChange = (questionIndex, optionIndex, e) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[questionIndex].options[optionIndex] = e.target.value;
+    setQuestions(updatedQuestions);
+  };
+
+  const handleUpdateExam = async (e) => {
+    e.preventDefault();
+    const updatedExam = { ...exam, questions };
+
+    try {
+      await axios.put(`http://localhost:8080/exams/update/${id}`, updatedExam);
+      navigate("/teacher/exams");
+    } catch (error) {
+      console.error("Error updating exam:", error);
+    }
+  };
+
+  return (
+    <div className="container mt-4">
+      <h2>Edit Exam</h2>
+      <form onSubmit={handleUpdateExam}>
+        <div className="form-group mb-2">
+          <label>Title</label>
+          <input
+            type="text"
+            name="title"
+            value={exam.title}
+            onChange={handleInputChange}
+            className="form-control"
+          />
+        </div>
+
+        <div className="form-group mb-2">
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={exam.description}
+            onChange={handleInputChange}
+            className="form-control"
+          />
+        </div>
+
+        <div className="form-group mb-2">
+          <label>Duration</label>
+          <input
+            type="text"
+            name="duration"
+            value={exam.duration}
+            onChange={handleInputChange}
+            className="form-control"
+          />
+        </div>
+
+        <div className="form-group mb-2">
+          <label>Score</label>
+          <input
+            type="number"
+            name="score"
+            value={exam.score}
+            onChange={handleInputChange}
+            className="form-control"
+          />
+        </div>
+
+        <h4>Questions</h4>
+        {questions.map((question, index) => (
+          <div key={index} className="card mb-2 p-2">
+            <div className="form-group mb-2">
+              <label>Question Text</label>
+              <input
+                type="text"
+                name="questionText"
+                value={question.questionText}
+                onChange={(e) => handleQuestionChange(index, e)}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group mb-2">
+              <label>Correct Answer</label>
+              <input
+                type="text"
+                name="correctAnswer"
+                value={question.correctAnswer}
+                onChange={(e) => handleQuestionChange(index, e)}
+                className="form-control"
+              />
+            </div>
+
+            <div>
+              <label>Options</label>
+              {question.options.map((option, optIndex) => (
+                <div key={optIndex} className="form-group mb-2">
+                  <label>Option {optIndex + 1}</label>
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, optIndex, e)}
+                    className="form-control"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <button type="submit" className="btn btn-primary">
+          Update Exam
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default EditExam;

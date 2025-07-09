@@ -29,9 +29,9 @@ const Courses = () => {
     });
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getCourses();
-  },[])
+  }, []);
 
   async function addCourse(new_course) {
     await axios
