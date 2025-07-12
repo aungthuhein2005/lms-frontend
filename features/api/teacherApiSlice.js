@@ -14,7 +14,7 @@ export const teacherApiSlice = createApi({
         }),
         createTeacher: builder.mutation({
             query: (newTeacher) => ({
-                url: '/',
+                url: '',
                 method: 'POST',
                 body: newTeacher
             }),
@@ -28,6 +28,20 @@ export const teacherApiSlice = createApi({
             }),
             invalidatesTags: (result, error, { id }) => [{ type: 'Teacher', id }]
         }),
+        hireteacher: builder.mutation({
+            query: (teacherId) => ({
+                url: `/hire/${teacherId}`,
+                method: 'PUT'
+            }),
+            invalidatesTags: ['Teacher']
+        }),
+assignToClass: builder.mutation({
+  query: ({ teacherId, classId, assigned_at }) => ({
+    url: `/assign_to_class`,
+    method: "POST",
+    body: { teacherId, classId, assigned_at },
+  }),
+}),
         deleteTeacher: builder.mutation({
             query: (id) => ({
                 url: `/${id}`,
@@ -43,5 +57,7 @@ export const {
     useGetTeacherByIdQuery,
     useCreateTeacherMutation,
     useUpdateTeacherMutation,
-    useDeleteTeacherMutation
+    useDeleteTeacherMutation,
+    useAssignToClassMutation,
+    useHireteacherMutation,
 } = teacherApiSlice;

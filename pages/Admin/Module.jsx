@@ -9,9 +9,12 @@ import { useDropzone } from "react-dropzone";
 import LessonCard from "../../components/LessonCard";
 import LessonModals from "../../components/LessonModals";
 import ModuleModals from "../../components/ModuleModals";
+import { useSelector } from "react-redux";
 
 const Module = () => {
   const { courseId } = useParams();
+  // const {role} = useSelector((state) => state.auth.user);
+  
   const [modules, setModules] = useState([]);
   const [course, setCourse] = useState({});
   const [selectedModuleId, setSelectedModuleId] = useState(null);
@@ -88,6 +91,8 @@ const Module = () => {
           `http://localhost:8080/courses/view/${courseId}`
         );
         setCourse(courseResponse.data);
+        console.log(course);
+        
 
         const modulesResponse = await axios.get(
           `http://localhost:8080/courses/${courseId}/modules`
@@ -239,17 +244,21 @@ const Module = () => {
   return (
     <>
       <Container className="py-4">
-        <Row className="mb-4 align-items-center justify-content-between">
-          <Col>
-            <h3>{course.title}</h3>
-            <p className="text-muted">{course.description}</p>
-          </Col>
-          <Col className="text-end">
-            <Button variant="primary" onClick={handleAddModuleShow}>
-              <i className="bx bx-message-square-add me-2"></i>Add Module
-            </Button>
-          </Col>
-        </Row>
+        <Row className="mb-4 p-3 bg-light rounded shadow-sm align-items-center justify-content-between">
+  <Col md={8}>
+    <h3 className="fw-bold text-primary mb-1">{course.title}</h3>
+    <p className="text-muted mb-0">{course.description}</p>
+    <small className="text-secondary">Subject: {course.subject?.name}</small>
+  </Col>
+
+  <Col md="auto" className="text-end">
+    <Button variant="outline-primary" className="d-flex align-items-center gap-2" onClick={handleAddModuleShow}>
+      <i className="bx bx-message-square-add fs-5"></i>
+      <span>Add Module</span>
+    </Button>
+  </Col>
+</Row>
+
 
         <Accordion alwaysOpen>
           {modules.map((module, idx) => (
@@ -263,27 +272,40 @@ const Module = () => {
               <Accordion.Body>
                 <Row className="mb-3 justify-content-end">
                   <Col xs="auto">
+                    {/* {role !== "ADMIN" && <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
+                      <i className="bx bx-message-square-add me-2"></i>Add Lesson
+                    </Button>} */}
                     <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
                       <i className="bx bx-message-square-add me-2"></i>Add Lesson
                     </Button>
                   </Col>
                 </Row>
 
-                {(lessonsByModule[module.id] || []).map((lessonItem) => (
-                  <LessonCard
-                    key={lessonItem.id}
-                    lessonItem={lessonItem}
-                    editStatus={editStatus}
-                    eLesson={eLesson}
-                    setELesson={setELesson}
-                    updateLesson={updateLesson}
-                    deleteLesson={deleteLesson}
-                    editLesson={editLesson}
-                    moduleId={module.id}
-                  />
-                ))}
+                {(lessonsByModule[module.id] && lessonsByModule[module.id].length > 0) ? (
+                  lessonsByModule[module.id].map((lessonItem) => (
+                    <LessonCard
+                      key={lessonItem.id}
+                      lessonItem={lessonItem}
+                      editStatus={editStatus}
+                      eLesson={eLesson}
+                      setELesson={setELesson}
+                      updateLesson={updateLesson}
+                      deleteLesson={deleteLesson}
+                      editLesson={editLesson}
+                      moduleId={module.id}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center text-muted mb-3">There is no lesson.</div>
+                )}
 
                 <div className="d-flex justify-content-end">
+                  {/* {role === "ADMIN" && (<><Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
+                    <i className="bx bxs-edit-alt"></i>
+                  </Button>
+                  <Button variant="outline-danger" onClick={() => deleteModule(module.id)}>
+                    <i className="bx bxs-trash"></i>
+                  </Button></>)} */}
                   <Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
                     <i className="bx bxs-edit-alt"></i>
                   </Button>

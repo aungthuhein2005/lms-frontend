@@ -13,7 +13,7 @@ export const academicYearApiSlice = createApi({
         }),
         addAcademicYear: builder.mutation({
             query: (academicYearData) => ({
-                url: "/academic-years/create",
+                url: "/academic-years",
                 method: "POST",
                 body: academicYearData,
             }),

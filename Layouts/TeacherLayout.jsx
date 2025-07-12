@@ -10,7 +10,8 @@ export default function TeacherLayout() {
     const tabs = [
   { name: 'Dashboard', path: '/teacher', icon: <i className="bx bxs-home" style={{ fontSize: 20 }}></i> },
   { name: 'Profile Settings', path: '/teacher/profile', icon: <i className="bx bxs-user" style={{ fontSize: 20 }}></i> },
-  { name: 'Courses & Classes', path: '/teacher/classes', icon: <i className="bx bxs-book-alt" style={{ fontSize: 20 }}></i> },
+  { name: 'Courses', path: '/teacher/courses', icon: <i className="bx bxs-book-alt" style={{ fontSize: 20 }}></i> },
+  { name: 'Classes', path: '/teacher/classes', icon: <i className="bx bxs-book-alt" style={{ fontSize: 20 }}></i> },
   { name: 'Timetable', path: '/teacher/timetable', icon: <i className="bx bxs-calendar" style={{ fontSize: 20 }}></i> },
   { name: 'Manage Assignments', path: '/teacher/assignments', icon: <i className="bx bxs-pencil" style={{ fontSize: 20 }}></i> },
   { name: 'Grading & Progress', path: '/teacher/grades', icon: <i className="bx bxs-bar-chart-alt-2" style={{ fontSize: 20 }}></i> },

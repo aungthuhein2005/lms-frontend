@@ -8,11 +8,13 @@ export default function UserCreate() {
   const dispatch = useDispatch();
   const [createUser] = useAddUserMutation();
 
-  const [formData, setFormData] = React.useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+const [formData, setFormData] = React.useState({
+  name: "",
+  email: "",
+  password: "",
+  role: "", 
+});
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -80,6 +82,21 @@ export default function UserCreate() {
               required
             />
           </Form.Group>
+          <Form.Group className="mb-3" controlId="formRole">
+  <Form.Label>Role</Form.Label>
+  <Form.Select
+    value={formData.role}
+    onChange={handleChange}
+    name="role"
+    required
+  >
+    <option value="">Select Role</option>
+    <option value="STUDENT">Student</option>
+    <option value="TEACHER">Teacher</option>
+    <option value="ADMIN">Admin</option>
+  </Form.Select>
+</Form.Group>
+
           <Form.Group className="mb-3" controlId="formPassword">
             <Form.Label>Password</Form.Label>
             <Form.Control

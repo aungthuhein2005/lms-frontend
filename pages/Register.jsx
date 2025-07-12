@@ -11,7 +11,7 @@ import {
 import logo from "@/assets/logo.png"; // Adjust as needed
 import { useDispatch } from "react-redux";
 import { registerUser } from "../features/auth/authThunk";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -26,6 +26,7 @@ const Register = () => {
   const [success, setSuccess] = useState("");
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +41,7 @@ const Register = () => {
      const resultAction = await dispatch(registerUser(form)).unwrap();
     setSuccess("User registered successfully!");
     setError("");
+    navigate("/login");
   };
 
   return (

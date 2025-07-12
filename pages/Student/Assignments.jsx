@@ -3,6 +3,9 @@ import { Container, Card, Button, Row, Col, Badge, Dropdown, DropdownDivider } f
 import AssignmentCard from '../../components/AssignmentCard';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useGetAssignmentsByStudentIdQuery } from '../../features/api/assignementApiSlice';
 
 const assignments = [
   {
@@ -32,6 +35,16 @@ const assignments = [
 ];
 
 function Assignment() {
+
+  
+  const { roleId: studentId } = useSelector(state => state.auth.user);
+const { data: assignments, isLoading } = useGetAssignmentsByStudentIdQuery(studentId);
+console.log(studentId);
+console.log(assignments);
+
+// Use assignments.map(...) to render cards just like in teacher UI
+
+
   return (
     <Container className="">
       <div className='d-flex justify-content-between align-items-center'>
@@ -55,7 +68,7 @@ function Assignment() {
       </div>
       </div>
       <Row className='gap-3 mt-4'>
-        {assignments.map((assignment) => (
+        {assignments?.map((assignment) => (
           
             <AssignmentCard assignment={assignment}/>
         ))}

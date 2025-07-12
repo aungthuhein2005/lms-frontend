@@ -1,25 +1,34 @@
-import React from 'react'
-import CourseCard from '../../components/CourseCard'
-import { useGetAssignedClassesQuery } from '../../features/api/studentApiSlice';
-import { useGetClassByStudentIdQuery, useGetClassesQuery } from '../../features/api/classApiSlice';
-import { useSelector } from 'react-redux';
-import { Badge, Container, Row, Card, Spinner,Col} from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React from "react";
+import axios from "axios";
+import {
+  Card,
+  Button,
+  Row,
+  Col,
+  Spinner,
+  Badge,
+  Container,
+} from "react-bootstrap";
 import {
   FaChalkboard,
   FaPlus,
   FaCalendarAlt,
   FaInfoCircle,
 } from "react-icons/fa";
+import { useGetClassByTeacherIdQuery } from "../../features/api/classApiSlice";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 export default function Classes() {
-  const {roleId: studentId} = useSelector((state)=> state.auth.user);
-  const { data: classes = [],isLoading,isError } = useGetClassByStudentIdQuery(studentId);
-  console.log(classes);
-  
+  const { id } = useSelector((state) => state.auth.user);
+  const {
+    data: classes,
+    isLoading,
+    isError,
+  } = useGetClassByTeacherIdQuery(2); // Use dynamic user ID
 
   return (
-       <Container className="py-5">
+    <Container className="py-5">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="fw-bold d-flex align-items-center gap-2">
@@ -82,5 +91,5 @@ export default function Classes() {
         </>
       )}
     </Container>
-  )
+  );
 }

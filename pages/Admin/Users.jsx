@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {Table,Button, Badge} from 'react-bootstrap';
+import { Button, Table, Badge, OverlayTrigger, Tooltip, Card } from 'react-bootstrap';
 import { useCheckDeleteUserMutation, useForceDeleteUserMutation, useGetUsersQuery } from '../../features/api/userApiSlice';
 import { confirm } from '../../helpers/confirm';
 import { useDispatch } from 'react-redux';
@@ -16,6 +16,10 @@ export default function Users() {
 const { data: users = [], isLoading, error } = useGetUsersQuery();
 const [checkDeleteUser, { isLoading: isDeleting }] = useCheckDeleteUserMutation();
 const [forceDeleteUser] = useForceDeleteUserMutation();
+console.log(users);
+
+
+
 
 const dispatch = useDispatch();
 
@@ -65,66 +69,71 @@ const handleDelete = async (id) => {
 
 
   return (
-    <div className="container mt-5">
-    <div className="d-flex justify-content-between align-items-center mb-4">
-      <h1 className="mb-4">Users</h1>
-      <Button variant="primary" className='d-flex align-items-center gap-2' href="/admin/users/create">
-        <i className='bx bx-plus-circle' style={{fontSize:24}}></i>Add User
-      </Button>
-    </div>
-       <Table striped bordered hover>
-        <thead className="table">
-          <tr>
-            <th>#</th>  
-            <th>Name</th>
-            <th>Role</th>
-            <th>Address</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Profile</th>
-            <th>Role</th>
-            <th>Gender</th>
-            <th>DOB</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan="12" className="text-center">No users found.</td>
-            </tr>
-          ) : (
-            users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                 <td className=''>
-                  <Badge bg={user.role ? roleColors[user.role] || "primary" : "secondary"}>
-    {user.role
-      ? user.role.charAt(0) + user.role.slice(1).toLowerCase()  // Capitalize first letter only
-      : "Not Assigned"}
-  </Badge>
-                 </td>
-                <td>{user.address}</td>
-                <td>{user.email}</td>
-                <td>{user.phone}</td>
-                <td>{user.profile}</td>
-                <td>{user.role}</td>
-                <td>{user.gender}</td>
-                <td>{user.dob}</td>
-                <td className='d-flex'>
-                  {/* <Button variant="success" size="sm" className="me-2" onClick={() => handleEdit(user)}>
-                    <i className='bx bxs-edit-alt'></i>
-                  </Button> */}
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(user.id)}>
-                    <i className='bx bxs-trash-alt'></i>
-                  </Button>
-                </td>
+<div className="container py-5">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold m-0">User Management</h2>
+        <Button variant="primary" className="d-flex align-items-center gap-2 shadow-sm" href="/admin/users/create">
+          <i className="bx bx-plus-circle fs-5"></i> Add User
+        </Button>
+      </div>
+
+      <Card className=" rounded-4">
+        <Card.Body>
+          <Table responsive hover className="align-middle mb-0">
+            <thead className="table-light">
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th className="text-end">Action</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </Table>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-4">No users found.</td>
+                </tr>
+              ) : (
+                users.map((user, index) => (
+                  <tr key={user.id}>
+                    <td>{index + 1}</td>
+                    <td>{user.name}</td>
+                    <td>
+                      <Badge bg={user.role ? roleColors[user.role] || "primary" : "secondary"}>
+                        {user.role
+                          ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+                          : "Not Assigned"}
+                      </Badge>
+                    </td>
+                    <td>{user.address}</td>
+                    <td>{user.email}</td>
+                    <td>{user.phone}</td>
+                    <td>{user.gender}</td>
+                    <td>{user.dob}</td>
+                    <td className="text-end">
+                      <OverlayTrigger overlay={<Tooltip>Delete User</Tooltip>}>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="rounded-circle"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <i className="bx bxs-trash-alt"></i>
+                        </Button>
+                      </OverlayTrigger>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
     </div>
   );
 }

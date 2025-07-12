@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const LessonCard = ({
   lessonItem,
@@ -170,6 +171,11 @@ const LessonCard = ({
         </Card.Text>
 
         <div className="d-flex justify-content-end">
+          <Button variant="outline-success" className="me-2">
+            <Link to={`/teacher/lessons/${lessonItem.id}/assignments`} className="text-decoration-none text-success">
+              <i className="bx bx-task"></i> Assignments
+            </Link>
+          </Button>
           <Button variant="outline-primary" className="me-2" onClick={() => editLesson(lessonItem)}>
             <i className="bx bxs-edit-alt"></i>
           </Button>

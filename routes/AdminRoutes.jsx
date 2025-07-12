@@ -19,6 +19,9 @@ import TeacherDetail from '../pages/Admin/TeacherDetail';
 import ClassDetail from '../components/ClassDetail';
 import AcademicYear from '../pages/Admin/AcademicYear';
 import AcademicYearDetail from '../pages/Admin/AcademicYearDetail';
+import SemesterDetail from '../pages/Admin/SemesterDetail';
+import Subjects from '../pages/Admin/Subject';
+import AttendanceList from '../pages/Admin/AttendancceList';
 
 const AdminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -26,8 +29,10 @@ const AdminRoutes = (
     <Route path="students" element={<Students />} />
     <Route path="students/create" element={<StudentCreate />} />
     <Route path="students/:id" element={<StudentDetail />} />
+     <Route path="subjects" element={<Subjects />} />
     <Route path="academic_year" element={<AcademicYear/>}/>
     <Route path="academic_year/:id" element={<AcademicYearDetail/>}/>
+    <Route path="semesters/:id" element={<SemesterDetail/>}/>
     <Route path="teachers" element={<Teachers />} />
     <Route path="teachers/create" element={<TeacherCreate />} />
     <Route path="teachers/:id" element={<TeacherDetail />} />
@@ -37,7 +42,7 @@ const AdminRoutes = (
     <Route path="courses/:courseId/modules" element={<Module />}/>
     <Route path="users" element={<Users />} />
     <Route path="users/create" element={<UserCreate />} />
-    <Route path="teachers_attendance" element={<TeachersAttendance />} />
+    <Route path="teachers_attendance" element={<AttendanceList />} />
     <Route path="report" element={<Report />} />
   </Route>
 );

@@ -6,18 +6,40 @@ export const classApiSlice = createApi({
     endpoints: (builder) => ({
         getClasses: builder.query({
             query: () => "/classes/all",
-            providesTags: ["Class"],
+            providesTags: (result) =>
+    result
+      ? [{ type: "Class", id: "LIST" }]
+      : [{ type: "Class", id: "LIST" }],
         }),
         getClassById: builder.query({
             query: (id) => `/classes/${id}`,
         }),
+        getRecentClasses: builder.query({
+  query: () => "/classes/recent",
+  providesTags: [{ type: "Class", id: "RECENT" }],
+}),
+
+        getClassByTeacherId: builder.query({
+            query: (teacherId) => `/classes/teacher/${teacherId}`,
+            providesTags: (result, error, teacherId) => 
+                result
+                    ? [{ type: "Class", id: `TEACHER_${teacherId}` }]
+                    : [{ type: "Class", id: `TEACHER_${teacherId}` }],
+        }),
+        getClassByStudentId: builder.query({
+            query: (studentId) => `/classes/student/${studentId}`,
+            providesTags: (result, error, studentId) => 
+                result
+                    ? [{ type: "Class", id: `STUDENT_${studentId}` }]
+                    : [{ type: "Class", id: `STUDENT_${studentId}` }],
+}),
         addClass: builder.mutation({
             query: (classData) => ({
                 url: "/classes/create",
                 method: "POST",
                 body: classData,
             }),
-            invalidatesTags: ["Class"],
+            invalidatesTags: [{ type: "Class", id: "LIST" }],
         }),
         updateClass: builder.mutation({
             query: ({ id, ...classData }) => ({
@@ -55,5 +77,8 @@ export const {
     useUpdateClassMutation,
     useSoftDeleteClassMutation,
     useRestoreClassMutation,
-    useDeleteClassMutation
+    useDeleteClassMutation,
+    useGetClassByTeacherIdQuery,
+    useGetClassByStudentIdQuery,
+    useGetRecentClassesQuery,
 } = classApiSlice;

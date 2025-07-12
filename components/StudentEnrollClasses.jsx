@@ -8,10 +8,7 @@ export default function StudentEnrollClasses({data}) {
     
   return (
     <div>
-      <Card className="shadow-sm">
-        <Card.Header><strong>Enrolled Classes</strong></Card.Header>
-        <Card.Body>
-          <Table striped bordered hover responsive>
+      <Table striped bordered hover responsive>
             <thead>
               <tr>
                 <th>ID</th>
@@ -34,8 +31,6 @@ export default function StudentEnrollClasses({data}) {
               ))}
             </tbody>
           </Table>
-        </Card.Body>
-      </Card>
     </div>
   )
 }

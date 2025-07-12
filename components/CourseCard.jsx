@@ -1,7 +1,8 @@
 import React from 'react'
 import { Button, Card } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 
-export default function CourseCard({title,description}) {
+export default function CourseCard({title,description,classId}) {
   return (
      <Card style={{ width: '18rem' }} className='p-0'>
       <Card.Img variant="top" src="https://placehold.co/600x300" />
@@ -10,7 +11,7 @@ export default function CourseCard({title,description}) {
         <Card.Text className='text-muted'>
             {description}
         </Card.Text>
-        <Button variant="primary">View</Button>
+        <Link to={`${classId}`} className="btn btn-sm btn-primary">View</Link>
       </Card.Body>
     </Card>
   )

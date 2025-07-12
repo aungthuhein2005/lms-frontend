@@ -9,6 +9,9 @@ import { userApiSlice } from "../features/api/userApiSlice";
 import confirmReducer from "../features/ui/confirmSlice";
 import { teacherApiSlice } from "../features/api/teacherApiSlice";
 import { academicYearApiSlice } from "../features/api/academicYearApiSlice";
+import { semesterServiceApiSlice } from "../features/api/semesterServiceApiSlice";
+import { assignmentApi } from "../features/api/assignementApiSlice";
+import { courseApiSlice } from "../features/api/courseApiSlice";
 
 const store = configureStore({
     reducer: {
@@ -22,6 +25,9 @@ const store = configureStore({
        [userApiSlice.reducerPath]: userApiSlice.reducer,
        [teacherApiSlice.reducerPath]: teacherApiSlice.reducer,
        [academicYearApiSlice.reducerPath]: academicYearApiSlice.reducer,
+       [semesterServiceApiSlice.reducerPath]: semesterServiceApiSlice.reducer,
+       [assignmentApi.reducerPath]: assignmentApi.reducer,
+       [courseApiSlice.reducerPath]: courseApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -31,7 +37,10 @@ const store = configureStore({
     .concat(studentApiSlice.middleware)
     .concat(classApiSlice.middleware)
     .concat(teacherApiSlice.middleware)
-    .concat(academicYearApiSlice.middleware),
+    .concat(academicYearApiSlice.middleware)
+    .concat(semesterServiceApiSlice.middleware)
+    .concat(assignmentApi.middleware)
+    .concat(courseApiSlice.middleware),
 });
 
 export default store;

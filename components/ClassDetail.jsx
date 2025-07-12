@@ -1,35 +1,92 @@
+import React, { useEffect, useState } from "react";
+import { Card, Badge, Row, Col } from "react-bootstrap";
+import { FaUserTie, FaCalendarAlt, FaUsers, FaChalkboard } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
+import { useGetClassByIdQuery } from "../features/api/classApiSlice";
+import ClassScheduleTable from "./ClassScheduleTable";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import StudentList from "./StudentList";
+import { useSelector } from "react-redux";
 
-const ClassDetail=()=>{
-
-  const {id} = useParams();
-  const [classData, setClassData] = useState();
-
-  useEffect(()=>{
-    axios.get(`http://localhost:8080/classes/${id}`)
-      .then((response) => {
-        setClassData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching class data:", error);
-      });
-  })
+export default function ClassDetail() {
+  const {role} = useSelector((state) => state.auth.user);
+  console.log(role);
   
-    return(
-        <>
-         <div className="p-6 max-w-xl mx-auto bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-4">Class Info</h2>
-      <div className="mb-4">
-        <p><strong>ID:</strong> {classData?.id}</p>
-        <p><strong>Name:</strong> {classData?.name}</p>
-        <p><strong>Description:</strong> {classData?.description}</p>
-        <p><strong>Schedule:</strong> {classData?.schedule}</p>
-          </div>
-      </div>
-        </>
-    )
-}
+  const { id } = useParams();
+  const { data, isLoading, error } = useGetClassByIdQuery(id);
+  const [students, setStudents] = useState([]);
 
-export default ClassDetail;
+  useEffect(() => {
+    const getStudents = async () => {
+      try {
+        const response = await axios(`http://localhost:8080/classes/${id}/students`);
+        setStudents(response.data);
+        console.log(response.data);
+        
+      } catch (err) {
+        console.error("Failed to fetch students", err);
+      }
+    };
+
+    if (id) getStudents();
+  }, [id]);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading class data.</p>;
+  if (!data) return <p>No class data provided.</p>;
+
+  const {
+    name,
+    description,
+    schedules,
+    semester,
+    course,
+    teacher,
+  } = data;
+
+  return (
+    <div className="container py-5">
+      <Card className="shadow-sm rounded-4">
+        <Card.Body>
+          <h3 className="fw-bold mb-3 d-flex align-items-center">
+            <FaChalkboard className="me-2" />
+            {name}
+            <Badge bg="secondary" className="ms-3">{`ID: ${data.id}`}</Badge>
+          </h3>
+
+          <Row className="mb-3">
+            <Col md={6}>
+              <p><strong>Description:</strong> {description || "No description"}</p>
+              <p>
+                <strong>Course:</strong>{" "}
+                {course ? (
+                  <Link to={`/admin/courses/${course.id}/modules`}>{course.title}</Link>
+                ) : "Not scheduled yet"}
+              </p>
+              <p><strong>Semester:</strong> {semester?.name || "Not assigned"}</p>
+            </Col>
+            <Col md={6}>
+              <p>
+                <FaUserTie className="me-2" />
+                <strong>Teacher:</strong> {teacher?.user?.name || "Not assigned"}
+              </p>
+              {teacher?.hire_date && (
+                <p>
+                  <FaCalendarAlt className="me-2" />
+                  <strong>Hired on:</strong> {teacher.hire_date}
+                </p>
+              )}
+              <p>
+                <FaUsers className="me-2" />
+                <strong>Enrolled Students:</strong> {students.length}
+              </p>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
+      <ClassScheduleTable schedules={schedules} />
+      {role !== 'STUDENT' && <StudentList students={students} />}
+    </div>
+  );
+}
