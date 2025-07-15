@@ -1,6 +1,7 @@
 // LessonModals.jsx
-import React from "react";
+import React, { useCallback } from "react";
 import { Modal, Button } from "react-bootstrap";
+import { useDropzone } from "react-dropzone";
 
 const LessonModals = ({
   showAddLesson,
@@ -12,6 +13,8 @@ const LessonModals = ({
   getInputProps,
   isDragActive,
 }) => {
+
+
   return (
     <Modal show={showAddLesson} onHide={handleAddLessonClose}>
       <Modal.Header closeButton>
@@ -30,13 +33,6 @@ const LessonModals = ({
           onChange={(e) => setELesson({ ...eLesson, description: e.target.value })}
           placeholder="Lesson Description">
         </textarea>
-        {/* <input
-          type="text"
-          className="form-control mb-3"
-          value={eLesson.description} // Use eLesson.description here
-          onChange={(e) => setELesson({ ...eLesson, description: e.target.value })}
-          placeholder="Lesson Description"
-        /> */}
         <div
           {...getRootProps()}
           className="dropzone p-4 border border-secondary rounded text-center mb-3"

@@ -13,7 +13,9 @@ const TeacherProfile = () => {
   const [showModal, setShowModal] = useState(false);
 
   // Default blank or fallback values
-  const teacherUser = data?.user || {};
+  const teacherUser = data?.teacher.user || {};
+  console.log(teacherUser);
+  
   const teacherProfile = data || {};
 
   const [formData, setFormData] = useState({
@@ -23,7 +25,7 @@ const TeacherProfile = () => {
     address: teacherUser.address || '',
     gender: teacherUser.gender || '',
     dob: teacherUser.dob || '',
-    profile: teacherProfile.profile || '',
+    profile: teacherUser.profile || '',
   });
 
   if (!isAuthenticated) return <ErrorMessage message="You are not authorized to view this page." />;

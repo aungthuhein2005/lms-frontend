@@ -13,6 +13,8 @@ import Exam from "../pages/Teacher/Exam";
 import ExamDetailPage from "../pages/Teacher/ExamDetail";
 import TeacherAssignmentPage from "../pages/Teacher/TeacherAssignment";
 import ViewSubmissions from "../pages/Teacher/ViewSubmission";
+import ProgreassGrading from "../pages/Teacher/ProgreassGrading";
+import GradingPage from "../pages/Teacher/GradingPage";
 
 const TeacherRoutes = (
     <Route path="/teacher" element={<TeacherLayout />}>
@@ -28,6 +30,8 @@ const TeacherRoutes = (
     <Route path="exams/create" element={<CreateExam />} />
     <Route path="exams/edit/:id" element={<EditExam />} />
     <Route path="assignments" element={<TeacherAssignmentPage />} />
+    <Route path="grades" element={<ProgreassGrading />} />
+    <Route path="grades/student/:id" element={<GradingPage />} />
     <Route path="assignments/:assignmentId/submissions" element={<ViewSubmissions />} />
     </Route>
 )

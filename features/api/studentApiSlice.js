@@ -11,6 +11,11 @@ export const studentApiSlice = createApi({
         getStudentById: builder.query({
             query: (id) => `/students/${id}`,
         }),
+        getStudentTimetable: builder.query({
+            query: (id) => `/students/${id}/schedule`,
+            providesTags: (result, error, id) =>
+                result ? [{ type: "Timetable", id }] : [],
+        }),
         addStudent: builder.mutation({
             query: (student) => ({
                 url: "/students",
@@ -19,6 +24,13 @@ export const studentApiSlice = createApi({
             }),
             invalidatesTags: ["Students","Users"],
         }),
+        enrollStudent: builder.mutation({
+            query: ({ id, ...student }) => ({
+                url: `/students/enroll/${id}`,
+                method: "PUT",
+                body: student,
+            }),
+    }), 
         updateStudent: builder.mutation({
             query: ({ id, ...student }) => ({
                 url: `/students/${id}`,
@@ -60,5 +72,7 @@ export const {
     useRestoreStudentMutation,
     useAssignToClassMutation,
     useGetAssignedClassesQuery,
+    useEnrollStudentMutation,
+    useGetStudentTimetableQuery,
 } = studentApiSlice;
 export default studentApiSlice.reducer;

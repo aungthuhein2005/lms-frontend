@@ -1,51 +1,36 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Spinner, Card, Button, Form } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Table, Spinner, Card, Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
+import { useGetSubmiteddAssignementsByAssignementIdQuery, useUpdateScoreMutation } from "../../features/api/assignementApiSlice";
 
 export default function ViewSubmissions() {
-  const { assignmentId } = useParams(); // passed from route
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { assignmentId } = useParams();
   const [scoreUpdates, setScoreUpdates] = useState({});
-
-  const fetchSubmissions = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/assignments/${assignmentId}/submissions`
-      );
-      setSubmissions(res.data);
-    } catch (err) {
-      console.error("Failed to fetch submissions", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSubmissions();
-  }, [assignmentId]);
+  const {data: submissions, isLoading} = useGetSubmiteddAssignementsByAssignementIdQuery(assignmentId);
+  console.log(submissions);
+  const [updateScore] = useUpdateScoreMutation();
+  
 
   const handleScoreChange = (id, value) => {
     setScoreUpdates({ ...scoreUpdates, [id]: value });
   };
 
-  const handleSaveScore = async (submissionId) => {
-    try {
-      await axios.patch(`http://localhost:8080/submissions/${submissionId}/score`, {
-        score: scoreUpdates[submissionId],
-      });
-      fetchSubmissions(); // Refresh
-    } catch (err) {
-      console.error("Failed to save score", err);
-    }
-  };
+  // const handleSaveScore = async (submissionId) => {
+  //   try {
+  //     await axios.patch(`http://localhost:8080/assignments/submissions/${submissionId}/score`, {
+  //       score: scoreUpdates[submissionId],
+  //     });
+  //   } catch (err) {
+  //     console.error("Failed to save score", err);
+  //   }
+  // };
 
   return (
     <div className="container py-5">
       <h3 className="fw-bold mb-4">View Submissions</h3>
 
-      {loading ? (
+      {isLoading ? (
         <div className="text-center">
           <Spinner animation="border" />
           <p>Loading submissions...</p>
@@ -55,9 +40,10 @@ export default function ViewSubmissions() {
       ) : (
         <Card className="shadow-sm rounded-4">
           <Card.Body>
-            <Table hover responsive>
-              <thead className="table-light">
+<Table responsive hover className="align-middle mb-0">
+            <thead className="table-light">
                 <tr>
+                  <th>Student ID</th>
                   <th>Student Name</th>
                   <th>Submitted At</th>
                   <th>File</th>
@@ -68,12 +54,13 @@ export default function ViewSubmissions() {
               <tbody>
                 {submissions.map((sub) => (
                   <tr key={sub.id}>
-                    <td>{sub.student.name}</td>
+                    <td>{sub.student.id}</td>
+                    <td>{sub.student.user.name}</td>
                     <td>{new Date(sub.submittedAt).toLocaleString()}</td>
                     <td>
-                      <a href={sub.fileUrl} target="_blank" rel="noreferrer">
+                      <Link to={`http://localhost:8080${sub.submittedFile}`} target="_blank" rel="noreferrer">
                         View File
-                      </a>
+                      </Link>
                     </td>
                     <td style={{ maxWidth: 120 }}>
                       <Form.Control
@@ -85,9 +72,16 @@ export default function ViewSubmissions() {
                       />
                     </td>
                     <td>
-                      <Button size="sm" variant="primary" onClick={() => handleSaveScore(sub.id)}>
-                        Save
-                      </Button>
+                                            <OverlayTrigger overlay={<Tooltip>Save</Tooltip>}>
+                                              <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                className="rounded-circle"
+                                                onClick={() => updateScore({ submissionId: sub.id, score: scoreUpdates[sub.id] || sub.score })}
+                                              >
+                                                <i class='bx bxs-save'></i>
+                                              </Button>
+                                            </OverlayTrigger>
                     </td>
                   </tr>
                 ))}

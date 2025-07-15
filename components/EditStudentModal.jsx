@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
-import { useUpdateStudentMutation } from "../features/api/studentApiSlice";
+import { useEnrollStudentMutation, useUpdateStudentMutation } from "../features/api/studentApiSlice";
 import { useDispatch } from "react-redux";
 import { showAlert } from "../features/ui/alertSlice";
 
@@ -9,7 +9,7 @@ export default function EditStudentModal({ show, handleClose, student }) {
     const dispatch = useDispatch()
   const [name, setName] = useState(student?.name || "");
   const [enrollDate, setEnrollDate] = useState(student?.enrollDate || "");
-  const [updateStudent] = useUpdateStudentMutation();
+  const [enrollStudent] = useEnrollStudentMutation();
   useEffect(() => {
     if (show && student) {
       setName(student.name || "");
@@ -28,7 +28,7 @@ export default function EditStudentModal({ show, handleClose, student }) {
         enrollDate, );
     
     try {
-      await updateStudent({
+      await enrollStudent({
         id: student.id,
         name,
         enrollDate, 

@@ -23,6 +23,10 @@ export const assignmentApi = createApi({
   query: (studentId) => `/student/${studentId}`,
   providesTags: (result, error, id) => [{ type: "Assignment", id }],
 }),
+getSubmiteddAssignementsByAssignementId: builder.query({
+  query: (assignmentId) => `/${assignmentId}/submissions`,
+    providesTags: (result, error, id) => [{ type: "Assignment", id }],
+}),
 
         addAssignment: builder.mutation({
             query: (newAssignment) => ({
@@ -39,6 +43,21 @@ export const assignmentApi = createApi({
                 body: patch,
             }),
             invalidatesTags: (result, error, { id }) => [{ type: 'Assignment', id }],
+        }),
+        updateScore: builder.mutation({
+            query: ({ submissionId, score }) => ({
+                url: `/submissions/${submissionId}/score`,
+                method: 'PATCH',
+                body: { score },
+            }),
+            invalidatesTags: (result, error, { submissionId }) => [{ type: 'Assignment', id: submissionId }],
+        }),
+        submitAssignment: builder.mutation({
+            query: ({ assignementId, ...patch }) => ({
+                url: `/submit`,
+                method: 'POST',
+                body: patch,
+            }),
         }),
         deleteAssignment: builder.mutation({
             query: (id) => ({
@@ -59,5 +78,8 @@ export const {
     useAddAssignmentMutation,
     useUpdateAssignmentMutation,
     useDeleteAssignmentMutation,
-    useGetAssignmentsByStudentIdQuery
+    useGetAssignmentsByStudentIdQuery,
+    useSubmitAssignmentMutation,
+    useGetSubmiteddAssignementsByAssignementIdQuery,
+    useUpdateScoreMutation,
 } = assignmentApi;

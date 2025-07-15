@@ -12,6 +12,7 @@ import { academicYearApiSlice } from "../features/api/academicYearApiSlice";
 import { semesterServiceApiSlice } from "../features/api/semesterServiceApiSlice";
 import { assignmentApi } from "../features/api/assignementApiSlice";
 import { courseApiSlice } from "../features/api/courseApiSlice";
+import { gradeApiSlice } from "../features/api/gradeApiSlice";
 
 const store = configureStore({
     reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
        [semesterServiceApiSlice.reducerPath]: semesterServiceApiSlice.reducer,
        [assignmentApi.reducerPath]: assignmentApi.reducer,
        [courseApiSlice.reducerPath]: courseApiSlice.reducer,
+       [gradeApiSlice.reducerPath]: gradeApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -40,7 +42,8 @@ const store = configureStore({
     .concat(academicYearApiSlice.middleware)
     .concat(semesterServiceApiSlice.middleware)
     .concat(assignmentApi.middleware)
-    .concat(courseApiSlice.middleware),
+    .concat(courseApiSlice.middleware)
+    .concat(gradeApiSlice.middleware),
 });
 
 export default store;

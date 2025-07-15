@@ -10,6 +10,7 @@ import Exams from "../pages/Student/Exams";
 import Attendances from "../pages/Student/Attendances";
 import Settings from "../pages/Student/Settings";
 import ClassDetail from "../components/ClassDetail";
+import Module from "../pages/Admin/Module";
 
 const StudentRoutes  = (
     <Route path="/student" element={<StudentLayout />}>
@@ -17,6 +18,7 @@ const StudentRoutes  = (
         <Route path="profile" element={<Profile />} />
         <Route path="classes" element={<Classes/>} />
         <Route path="classes/:id" element={<ClassDetail/>} />
+        <Route path="courses/:courseId/modules" element={<Module/>}/>
       <Route path="timetable" element={<Timetable/>} />
         <Route path="assignments" element={<Assignments/>} />
         <Route path="grades" element={<Grades/>} />

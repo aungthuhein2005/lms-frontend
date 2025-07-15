@@ -1,4 +1,5 @@
 import { Table } from 'react-bootstrap';
+import { formatTime24to12 } from '../helpers/timeFormatter';
 
 export default function ClassScheduleTable({ schedules = [] }) {
     console.log(schedules);
@@ -19,8 +20,8 @@ export default function ClassScheduleTable({ schedules = [] }) {
             schedules.map((item, index) => (
               <tr key={index}>
                 <td>{item.dayOfWeek}</td>
-                <td>{item.startTime}</td>
-                <td>{item.endTime}</td>
+                <td>{formatTime24to12(item.startTime)}</td>
+                <td>{formatTime24to12(item.endTime)}</td>
               </tr>
             ))
           ) : (

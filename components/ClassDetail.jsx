@@ -9,8 +9,7 @@ import StudentList from "./StudentList";
 import { useSelector } from "react-redux";
 
 export default function ClassDetail() {
-  const {role} = useSelector((state) => state.auth.user);
-  console.log(role);
+  let {role} = useSelector((state) => state.auth.user);
   
   const { id } = useParams();
   const { data, isLoading, error } = useGetClassByIdQuery(id);
@@ -60,7 +59,7 @@ export default function ClassDetail() {
               <p>
                 <strong>Course:</strong>{" "}
                 {course ? (
-                  <Link to={`/admin/courses/${course.id}/modules`}>{course.title}</Link>
+                  <Link to={`/${role.toLowerCase()}/courses/${course.id}/modules`}>{course.title}</Link>
                 ) : "Not scheduled yet"}
               </p>
               <p><strong>Semester:</strong> {semester?.name || "Not assigned"}</p>

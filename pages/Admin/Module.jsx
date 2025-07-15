@@ -10,10 +10,13 @@ import LessonCard from "../../components/LessonCard";
 import LessonModals from "../../components/LessonModals";
 import ModuleModals from "../../components/ModuleModals";
 import { useSelector } from "react-redux";
+import { uploadMedia } from "../../helpers/fileUploader";
 
 const Module = () => {
   const { courseId } = useParams();
-  // const {role} = useSelector((state) => state.auth.user);
+  const {role} = useSelector((state) => state.auth.user);
+  console.log(role);
+  
   
   const [modules, setModules] = useState([]);
   const [course, setCourse] = useState({});
@@ -162,23 +165,6 @@ const Module = () => {
     await getModulesByCourseId(courseId);
   }
 
-  async function uploadMedia(file) {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await axios.post(`http://localhost:8080/media/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Media upload failed:", error);
-      return null;
-    }
-  }
-
   const handleAddLesson = async () => {
     let uploadMediaResult = {};
 
@@ -252,10 +238,11 @@ const Module = () => {
   </Col>
 
   <Col md="auto" className="text-end">
-    <Button variant="outline-primary" className="d-flex align-items-center gap-2" onClick={handleAddModuleShow}>
+    {role === "ADMIN" && (
+      <Button variant="outline-primary" className="d-flex align-items-center gap-2" onClick={handleAddModuleShow}>
       <i className="bx bx-message-square-add fs-5"></i>
       <span>Add Module</span>
-    </Button>
+    </Button>)}
   </Col>
 </Row>
 
@@ -272,12 +259,10 @@ const Module = () => {
               <Accordion.Body>
                 <Row className="mb-3 justify-content-end">
                   <Col xs="auto">
-                    {/* {role !== "ADMIN" && <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
+                    {role === "ADMIN" && <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
                       <i className="bx bx-message-square-add me-2"></i>Add Lesson
-                    </Button>} */}
-                    <Button variant="primary" onClick={() => handleAddLessonShow(module.id)}>
-                      <i className="bx bx-message-square-add me-2"></i>Add Lesson
-                    </Button>
+                    </Button>}
+                    
                   </Col>
                 </Row>
 
@@ -300,18 +285,13 @@ const Module = () => {
                 )}
 
                 <div className="d-flex justify-content-end">
-                  {/* {role === "ADMIN" && (<><Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
+                  {role === "ADMIN" && (<><Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
                     <i className="bx bxs-edit-alt"></i>
                   </Button>
                   <Button variant="outline-danger" onClick={() => deleteModule(module.id)}>
                     <i className="bx bxs-trash"></i>
-                  </Button></>)} */}
-                  <Button variant="outline-secondary" className="me-2" onClick={() => handleEditModuleShow(module)}>
-                    <i className="bx bxs-edit-alt"></i>
-                  </Button>
-                  <Button variant="outline-danger" onClick={() => deleteModule(module.id)}>
-                    <i className="bx bxs-trash"></i>
-                  </Button>
+                  </Button></>)}
+                  
                 </div>
               </Accordion.Body>
             </Accordion.Item>

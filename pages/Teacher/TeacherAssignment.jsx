@@ -3,8 +3,11 @@ import axios from "axios";
 import { Button, Card, Modal, Form, Row, Col } from "react-bootstrap";
 import { useGetClassByTeacherIdQuery } from "../../features/api/classApiSlice";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function TeacherAssignmentPage() {
+  const {roleId} = useSelector((state) => state.auth.user);
+  
   const [assignments, setAssignments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -16,12 +19,14 @@ export default function TeacherAssignmentPage() {
     classId: "",
   });
 
-  const { data: teacherClasses } = useGetClassByTeacherIdQuery(1);
+  const { data: teacherClasses } = useGetClassByTeacherIdQuery(roleId);
   const {lessonId} = useParams();
   const fetchAssignments = async () => {
     const res = await axios.get(
-      `http://localhost:8080/assignments/teacher/${1}`
+      `http://localhost:8080/assignments/teacher/${roleId}`
     );
+    console.log(res);
+    
     setAssignments(res.data);
   };
   
@@ -33,7 +38,7 @@ export default function TeacherAssignmentPage() {
     await axios.post(`http://localhost:8080/assignments/create`, {
       ...formData,
       classId: parseInt(formData.classId),
-      teacherId: 1,
+      teacherId: roleId,
     });
     fetchAssignments();
     setShowModal(false);
@@ -57,7 +62,8 @@ export default function TeacherAssignmentPage() {
       </div>
 
       {/* Assignment Cards */}
-      <Row xs={1} md={2} lg={3} className="g-4">
+      {assignments.length> 0 ? (
+        <Row xs={1} md={2} lg={3} className="g-4">
         {assignments?.map((a) => (
           <Col key={a.id}>
             <Card className="shadow-sm h-100">
@@ -90,79 +96,121 @@ export default function TeacherAssignmentPage() {
             </Card>
           </Col>
         ))}
-      </Row>
+      </Row>) : (
+        <div className="text-center text-muted mt-5">
+          <p>No assignments found.</p>
+          </div>)
+          }
 
       {/* Modal for creating assignment */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create Assignment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Control
-              className="mb-2"
-              placeholder="Title"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              as="textarea"
-              placeholder="Description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              type="date"
-              value={formData.dueDate}
-              onChange={(e) =>
-                setFormData({ ...formData, dueDate: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              placeholder="Media URL"
-              value={formData.media}
-              onChange={(e) =>
-                setFormData({ ...formData, media: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              value={formData.point}
-              onChange={(e) =>
-                setFormData({ ...formData, point: e.target.value })
-              }
-            />
-            <Form.Group className="mb-3">
-              <Form.Label>Select Class</Form.Label>
-              <Form.Select
-                value={formData.classId}
-                onChange={(e) =>
-                  setFormData({ ...formData, classId: e.target.value })
-                }
-                required
-              >
-                <option value="">Choose Class</option>
-                {teacherClasses?.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={handleCreate}>✅ Save Assignment</Button>
-        </Modal.Footer>
-      </Modal>
+<Modal show={showModal} onHide={() => setShowModal(false)} centered>
+  <Modal.Header closeButton>
+    <Modal.Title className="fw-bold">📝 Create Assignment</Modal.Title>
+  </Modal.Header>
+
+  <Modal.Body className="px-4">
+    <Form>
+      {/* Title */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Assignment Title</Form.Label>
+        <Form.Control
+          placeholder="Enter assignment title"
+          value={formData.title}
+          onChange={(e) =>
+            setFormData({ ...formData, title: e.target.value })
+          }
+          required
+        />
+      </Form.Group>
+
+      {/* Description */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Description</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          placeholder="Provide a brief description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+        />
+      </Form.Group>
+
+      {/* Due Date */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Due Date</Form.Label>
+        <Form.Control
+          type="date"
+          value={formData.dueDate}
+          onChange={(e) =>
+            setFormData({ ...formData, dueDate: e.target.value })
+          }
+          required
+        />
+      </Form.Group>
+
+      {/* Media URL */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Media / Resource Link</Form.Label>
+        <Form.Control
+          placeholder="Paste video, file, or document URL"
+          value={formData.media}
+          onChange={(e) =>
+            setFormData({ ...formData, media: e.target.value })
+          }
+        />
+      </Form.Group>
+
+      {/* Points */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Points</Form.Label>
+        <Form.Control
+          type="number"
+          placeholder="e.g. 10"
+          value={formData.point}
+          onChange={(e) =>
+            setFormData({ ...formData, point: e.target.value })
+          }
+          required
+        />
+      </Form.Group>
+
+      {/* Class Selection */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Assign to Class</Form.Label>
+        <Form.Select
+          value={formData.classId}
+          onChange={(e) =>
+            setFormData({ ...formData, classId: e.target.value })
+          }
+          required
+        >
+          <option value="">Choose Class</option>
+          {teacherClasses?.map((cls) => (
+            <option key={cls.id} value={cls.id}>
+              {cls.name}
+            </option>
+          ))}
+        </Form.Select>
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+
+  <Modal.Footer className="px-4 pb-3">
+    <Button
+      variant="outline-secondary"
+      onClick={() => setShowModal(false)}
+      className="me-2"
+    >
+      ❌ Cancel
+    </Button>
+    <Button variant="primary" onClick={handleCreate}>
+      ✅ Save Assignment
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </div>
   );
 }
