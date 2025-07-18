@@ -46,7 +46,7 @@ const TeacherProfile = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Teacher Profile</h2>
+      <h2 className="fw-bold text-primary">Teacher Profile</h2>
       <Card className="shadow-sm rounded-4 p-4">
         <Row className="align-items-center">
           <Col md={3} className="text-center">

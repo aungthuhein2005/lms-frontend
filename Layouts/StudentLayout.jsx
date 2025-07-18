@@ -16,18 +16,13 @@ export default function StudentLayout() {
   { name: 'Grades', path: '/student/grades', icon: <i className="bx bxs-bar-chart-alt-2" style={{ fontSize: 20 }}></i> },
   { name: 'Exams', path: '/student/exams', icon: <i className="bx bxs-edit" style={{ fontSize: 20 }}></i> },
  
+ 
   { name: 'Attendance', path: '/student/attendances', icon: <i className="bx bxs-check-circle" style={{ fontSize: 20 }}></i> },
   { name: 'Settings', path: '/student/settings', icon: <i className="bx bxs-cog" style={{ fontSize: 20 }}></i> },
   { name: 'Logout', path: '/logout', icon: <i className="bx bx-log-out" style={{ fontSize: 20 }}></i> }
 ];
 
-        // { name: 'Teachers', path: '/student/teachers', icon: <i className="bx bxs-book-reader" style={{ fontSize: 20 }}></i> },
-        // { name: 'Courses', path: '/student/courses', icon: <i className="bx bxs-book-alt" style={{ fontSize: 20 }}></i> },
-        // { name: 'Students', path: '/student/students', icon: <i className='bx bx-male-female' style={{ fontSize: 20 }}></i> },
-        // { name: 'Classes', path: '/student/classes', icon: <i className="bx bxs-directions" style={{ fontSize: 20 }}></i> },
-        // { name: "Teacher's Attendance", path: '/admin/teachers_attendance', icon: <i className="bx bxs-select-multiple" style={{ fontSize: 20 }}></i> },
-        // { name: 'Report', path: '/admin/report', icon: <i className="bx bxs-report" style={{ fontSize: 20 }}></i> },
-      
+
 
       const role = 'student'
 

@@ -7,7 +7,10 @@ import { useGetSemestersByAcademicYearIdQuery, useGetSemestersQuery } from '../.
 import { useAddClassMutation, useDeleteClassMutation, useGetClassesQuery } from '../../features/api/classApiSlice';
 import {useGetAcademicYearsQuery } from '../../features/api/academicYearApiSlice';
 import { skipToken } from '@reduxjs/toolkit/query';
-// import {useGetCoursesQuery} from '../../features/api/courseApiSlice';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+import ReactPaginate from 'react-paginate';
 
 export default function Classes() {
  const {
@@ -15,7 +18,8 @@ export default function Classes() {
   isLoading: isClassesLoading,
   refetch: refetchClasses,
 } = useGetClassesQuery();
-
+  console.log(classes);
+  
   const [addClassMutation] = useAddClassMutation();
   const [updateClassMutation] = useAddClassMutation();
   const [deletedClassMutation] = useDeleteClassMutation();
@@ -30,6 +34,8 @@ export default function Classes() {
   const [selectedSemesterId, setSelectedSemesterId] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [eClass, setEClass] = useState({ id: '', name: '', description: '', schedule: '' });
   const [editStatus, setEditStatus] = useState(false);
 const [schedules, setSchedules] = useState([
@@ -39,6 +45,20 @@ const [schedules, setSchedules] = useState([
 const { data: semestersData = [] } = useGetSemestersByAcademicYearIdQuery(
   selectedAcademicYearId || skipToken
 );
+const [currentPage, setCurrentPage] = useState(0);
+const itemsPerPage = 8;
+const filteredClasses = classes?.filter((cls) =>
+  cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  cls.description?.toLowerCase().includes(searchTerm.toLowerCase())
+);
+const pageCount = Math.ceil(filteredClasses?.length / itemsPerPage);
+const paginatedClasses = filteredClasses?.slice(
+  currentPage * itemsPerPage,
+  (currentPage + 1) * itemsPerPage
+);
+
+const handlePageChange = ({ selected }) => setCurrentPage(selected);
+
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -46,6 +66,7 @@ const { data: semestersData = [] } = useGetSemestersByAcademicYearIdQuery(
   const getCourses = async () => {
     const response = await axios.get('http://localhost:8080/courses/all');
     setCoursesData(response.data);
+    
   }
 
 const handleScheduleChange = (index, field, value) => {
@@ -154,22 +175,38 @@ const resetForm = () => {
 };
 
 
+
+const exportToExcel = () => {
+  const exportData = filteredClasses.map(cls => ({
+    ID: cls.id,
+    Name: cls.name,
+    Description: cls.description,
+    Semester: cls.semester?.name,
+    Course: cls.course?.title,
+    Teacher: cls.teacher?.name
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Classes");
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(dataBlob, "classes.xlsx");
+};
+
+
   const deletedClass = async (id) => {
     deletedClassMutation(id);
   };
 
   return (
 <div className="container py-5">
-      {/* Header */}
-  <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-    <div>
-      <h2 className="fw-bold text-primary">Manage Classes</h2>
-      <p className="text-muted mb-0">View, add, and manage classes with their schedules and instructors.</p>
-    </div>
-    <Button variant="primary" className="mt-3 mt-md-0" onClick={handleShow}>
+  <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="fw-bold text-primary">Classes</h2>
+<Button variant="primary" className="mt-3 mt-md-0" onClick={handleShow}>
       <i className="bx bx-plus-circle me-2"></i> Add Class
     </Button>
-  </div>
+        </div>
 
 
       {/* Add/Edit Class Modal */}
@@ -318,6 +355,25 @@ const resetForm = () => {
       {/* Table Card */}
       <Card className="shadow-sm rounded-4">
         <Card.Body>
+                <Row className="mb-3 align-items-end">
+        <Col md={4}>
+          <Form.Control
+            placeholder="🔍 Search by name"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
+          />
+        </Col>
+        <Col md={2}>
+          <Button variant="secondary" onClick={resetForm}>Reset</Button>
+        </Col>
+        <Col md={{ span: 2, offset: 4 }} className="text-end">
+          <Button variant="success" onClick={exportToExcel}>Export Excel</Button>
+        </Col>
+      </Row>
+
           <Table hover responsive className="align-middle mb-0">
             <thead className="table-light">
               <tr>
@@ -328,7 +384,10 @@ const resetForm = () => {
               </tr>
             </thead>
            <tbody>
-  {classes?.map((classData) => (
+  {paginatedClasses.length === 0 ? (
+    <tr><td colSpan="4" className="text-center py-4">No teachers found.</td></tr>
+  ) :
+  (paginatedClasses?.map((classData) => (
     <tr key={classData.id}>
       <td>{classData.id}</td>
       <td>{classData.name}</td>
@@ -367,11 +426,29 @@ const resetForm = () => {
           </Link>
         </OverlayTrigger>
       </td>
-    </tr>
+    </tr>)
   ))}
 </tbody>
 
           </Table>
+          <div className="d-flex justify-content-center mt-4">
+  <ReactPaginate
+    pageCount={pageCount}
+    onPageChange={handlePageChange}
+    containerClassName="pagination"
+    pageClassName="page-item"
+    pageLinkClassName="page-link"
+    activeClassName="active"
+    previousLabel="«"
+    nextLabel="»"
+    previousClassName="page-item"
+    nextClassName="page-item"
+    previousLinkClassName="page-link"
+    nextLinkClassName="page-link"
+    forcePage={currentPage}
+  />
+</div>
+
         </Card.Body>
       </Card>
     </div>

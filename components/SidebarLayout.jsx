@@ -87,31 +87,15 @@ const SidebarContent = ({tabs,role}) => {
           </Nav.Link>
         ))}
         
-        <Nav.Link href="#" className="custom-nav-link" active={activeLink === '#'}>
+        {/* <Nav.Link href="#" className="custom-nav-link" active={activeLink === '#'}>
           <Envelope className="icon" />
           Mail <Badge bg="primary" pill className="badge-right">10+</Badge>
         </Nav.Link>
         <Nav.Link href="#" className="custom-nav-link" active={activeLink === '#'}>
           <ChatDots className="icon" />
           Chat <Badge bg="primary" pill className="badge-right">2+</Badge>
-        </Nav.Link>
+        </Nav.Link> */}
       </Nav>
-
-      {/* <div className="sidebar-footer mt-auto p-3">
-        <div className="d-flex align-items-center user-profile">
-          <img
-            src={admin_image}
-            alt="User"
-            width={50}
-            height={50}
-            className="user-icon border rounded-circle object-fit-cover"
-          />
-          <div>
-            <div className="fw-bold">Tharindu Damsara</div>
-            <small>eg22334@eng.ruh.ac.lk</small>
-          </div>
-        </div>
-      </div> */}
     </>
   );
 };

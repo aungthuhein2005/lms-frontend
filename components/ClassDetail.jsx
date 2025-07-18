@@ -14,14 +14,12 @@ export default function ClassDetail() {
   const { id } = useParams();
   const { data, isLoading, error } = useGetClassByIdQuery(id);
   const [students, setStudents] = useState([]);
-
+  
   useEffect(() => {
     const getStudents = async () => {
       try {
         const response = await axios(`http://localhost:8080/classes/${id}/students`);
         setStudents(response.data);
-        console.log(response.data);
-        
       } catch (err) {
         console.error("Failed to fetch students", err);
       }
@@ -85,7 +83,7 @@ export default function ClassDetail() {
       </Card>
 
       <ClassScheduleTable schedules={schedules} />
-      {role !== 'STUDENT' && <StudentList students={students} />}
+      {role !== 'STUDENT' && <StudentList students={students} courseId={data.course?.id} />}
     </div>
   );
 }

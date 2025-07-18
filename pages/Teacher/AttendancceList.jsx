@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { Table, Button, Form, Accordion, OverlayTrigger, Tooltip, Spinner, Card, Row, Col } from 'react-bootstrap'; // Added Row, Col
+import { Table, Button, Form, Accordion, OverlayTrigger, Tooltip, Spinner, Card, Row, Col } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { showAlert } from '../../features/ui/alertSlice';
 import Swal from 'sweetalert2';
-import ReactPaginate from 'react-paginate'; // Import ReactPaginate
-import * as XLSX from 'xlsx'; // Import XLSX for Excel export
-import { saveAs } from 'file-saver'; // Import saveAs for file download
+import ReactPaginate from 'react-paginate';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
-import { useGetTeachersQuery } from '../../features/api/teacherApiSlice';
-import {
+// --- IMPORTANT: Removed useGetTeachersQuery if this component is only for students ---
+// import { useGetTeachersQuery } from '../../features/api/teacherApiSlice'; // <--- REMOVED
+
+import { // Ensure these are imported from the correct slice if separate for students/teachers
   useGetAttendancesByTypeQuery,
   useAddAttendanceMutation,
   useUpdateAttendanceMutation,
   useDeleteAttendanceMutation,
-} from '../../features/api/attendanceApiSlice';
+} from '../../features/api/attendanceApiSlice'; // Assuming attendanceApiSlice handles both student/teacher attendances
+import { useGetStudentsQuery } from '../../features/api/studentApiSlice'; // <--- KEPT for fetching students
 
 // Helper function to group data by date
 const groupByDate = (data) => {
-  if (!data) return {}; // Handle case where data might be undefined initially
+  if (!data) return {};
   return data.reduce((groups, item) => {
     const date = item.date;
     if (!groups[date]) {
@@ -34,9 +37,16 @@ const AttendanceList = () => {
   const dispatch = useDispatch();
 
   // RTK Query hooks for fetching data
-  const { data: teachers, isLoading: isLoadingTeachers, isError: isErrorTeachers } = useGetTeachersQuery();
-  const { data: attendances, isLoading: isLoadingAttendances, isError: isErrorAttendances } = useGetAttendancesByTypeQuery('TEACHER_ATTENDANCE');
+  // Now fetching students data instead of teachers
+  const { data: students, isLoading: isLoadingStudents, isError: isErrorStudents } = useGetStudentsQuery();
+  console.log(students);
+  
+  
+  // Fetch attendances specifically for STUDENT type
+  // Make sure 'STUDENT' matches your Java enum constant (e.g., public enum Type { STUDENT, TEACHER } )
+  const { data: attendances, isLoading: isLoadingAttendances, isError: isErrorAttendances } = useGetAttendancesByTypeQuery('STUDENT_ATTENDANCE'); // Changed to 'STUDENT'
 
+  
   // RTK Query hooks for mutations
   const [addAttendanceMutation] = useAddAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
@@ -48,15 +58,16 @@ const AttendanceList = () => {
   const [toDate, setToDate] = useState('');
 
   // State for pagination
-  const [currentPage, setCurrentPage] = useState(0); // ReactPaginate uses 0-based index
-  const [pageSize] = useState(5); // Number of attendance records per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(5);
 
   // Filtered and Paginated Attendances
   const filteredAttendances = attendances
     ? attendances.filter(attendance => {
-        // Filter by search term (teacher name or attendance ID)
+        // Filter by search term (student name or attendance ID)
+       
         const matchesSearchTerm =
-          (attendance.teacher?.user?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (attendance.student.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
           attendance.id.toString().includes(searchTerm);
 
         // Filter by date range
@@ -84,29 +95,32 @@ const AttendanceList = () => {
   // Group paginated and filtered attendances by date for display
   const groupedPaginated = groupByDate(paginatedAndFilteredAttendances);
 
-
+  // --- State for editing an attendance record ---
   const [eAttendance, setEAttendance] = useState({
     id: '',
     date: '',
-    teacherId: '',
+    // Changed from teacherId to studentId
+    studentId: '', // Use studentId instead of teacherId
     status: '',
     remark: '',
-    type: 'TEACHER_ATTENDANCE',
+    type: 'STUDENT_ATTENDANCE', // Ensure type matches the fetched type
   });
 
+  // --- State for new attendance form ---
   const [formData, setFormData] = useState({
     date: '',
-    teacherId: '',
+    studentId: '',
     status: 'attempt',
     remark: '',
-    type: 'TEACHER_ATTENDANCE',
+    type: 'STUDENT_ATTENDANCE', // Ensure type matches what you're adding
   });
 
   const handleAddAttendance = async (newAttendance) => {
     try {
       await addAttendanceMutation(newAttendance).unwrap();
       dispatch(showAlert({ show: true, message: "Add Success", title: "Success", type: "success" }));
-      setFormData({ date: '', teacherId: '', status: 'attempt', remark: '' });
+      // Reset form data for student
+      setFormData({ date: '', studentId: '', status: 'attempt', remark: '', type: 'STUDENT_ATTENDANCE' });
       setShowForm(false);
     } catch (error) {
       console.error("Failed to add attendance:", error);
@@ -116,7 +130,13 @@ const AttendanceList = () => {
 
   const handleEditAttendance = (attendance) => {
     setEditStatus(true);
-    setEAttendance(attendance);
+    // Ensure you're setting the studentId for editing
+    setEAttendance({
+      ...attendance,
+      studentId: attendance.student?.id || '', // Populate studentId if available
+      // Make sure 'type' is also set correctly from the existing attendance
+      type: attendance.type || 'STUDENT'
+    });
   };
 
   const handleUpdateAttendance = async (updatedAttendance) => {
@@ -142,7 +162,8 @@ const AttendanceList = () => {
       });
     } finally {
       setEditStatus(false);
-      setEAttendance({ id: '', date: '', teacherId: '', status: '', remark: '' });
+      // Reset editing state for student
+      setEAttendance({ id: '', date: '', studentId: '', status: '', remark: '', type: 'STUDENT_ATTENDANCE' });
     }
   };
 
@@ -171,8 +192,18 @@ const AttendanceList = () => {
   };
 
   const handleEditChange = (e) => {
-    setEAttendance({ ...eAttendance, [e.target.name]: e.target.value });
+    // If the changed field is 'studentId', convert it to integer
+    const value = e.target.name === 'studentId' ? parseInt(e.target.value, 10) : e.target.value;
+    setEAttendance({ ...eAttendance, [e.target.name]: value });
   };
+
+
+  const handleFormChange = (e) => {
+    // If the changed field is 'studentId', convert it to integer
+    const value = e.target.name === 'studentId' ? parseInt(e.target.value, 10) : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
+  };
+
 
   const handlePageChange = ({ selected }) => {
     setCurrentPage(selected);
@@ -182,7 +213,7 @@ const AttendanceList = () => {
     setSearchTerm('');
     setFromDate('');
     setToDate('');
-    setCurrentPage(0); // Reset to first page
+    setCurrentPage(0);
   };
 
   const exportToExcel = () => {
@@ -194,32 +225,34 @@ const AttendanceList = () => {
     const dataToExport = filteredAttendances.map(att => ({
       ID: att.id,
       Date: att.date,
-      Teacher: att.teacher?.user?.name || 'N/A',
+      // Changed from Teacher to Student
+      Student: att.student?.name || 'N/A', // Assuming student has a user.name
       Status: att.status,
       Remark: att.remark,
+      Type: att.type, // Include the type in the export
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+    XLSX.utils.book_append_sheet(wb, ws, "StudentAttendance"); // Sheet name
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(data, 'TeacherAttendance.xlsx');
+    saveAs(data, 'StudentAttendance.xlsx'); // File name
   };
 
-  // Handle loading and error states for teachers and attendances
-  if (isLoadingTeachers || isLoadingAttendances) {
+  // Handle loading and error states for students and attendances
+  if (isLoadingStudents || isLoadingAttendances) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
-        <p>Loading attendance data...</p>
+        <p>Loading student attendance data...</p>
       </div>
     );
   }
 
-  if (isErrorTeachers || isErrorAttendances) {
+  if (isErrorStudents || isErrorAttendances) {
     return (
       <div className="text-center mt-5 alert alert-danger">
         <p>Error loading data. Please try again later.</p>
@@ -227,12 +260,13 @@ const AttendanceList = () => {
     );
   }
 
-  const availableTeachers = teachers || [];
+  // Use availableStudents instead of availableTeachers
+  const availableStudents = students || [];
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between mb-3">
-        <h2 className='fw-bold text-primary'>Teacher Attendance</h2>
+        <h2 className='fw-bold text-primary'>Student Attendance</h2>
         <Button variant="primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? "Close Form" : "Add Attendance"}
         </Button>
@@ -252,21 +286,21 @@ const AttendanceList = () => {
                     type="date"
                     name="date"
                     value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    onChange={handleFormChange}
                     required
                   />
                 </div>
                 <div className="col-md-4 mb-3">
-                  <Form.Label>Teacher</Form.Label>
+                  <Form.Label>Student</Form.Label> {/* Changed from Teacher to Student */}
                   <Form.Select
-                    name="teacherId"
-                    value={formData.teacherId}
-                    onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+                    name="studentId" // Changed name to studentId
+                    value={formData.studentId}
+                    onChange={handleFormChange}
                     required
                   >
-                    <option value="">Choose teacher</option>
-                    {availableTeachers.map((teacher) =>
-                      <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                    <option value="">Choose student</option> {/* Changed to Choose student */}
+                    {availableStudents.map((student) => // Map over availableStudents
+                      <option key={student.id} value={student.id}>{student.name || student.id}</option>
                     )}
                   </Form.Select>
                 </div>
@@ -275,7 +309,7 @@ const AttendanceList = () => {
                   <Form.Select
                     name="status"
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    onChange={handleFormChange}
                   >
                     <option value="attempt">Attempt</option>
                     <option value="late">Late</option>
@@ -290,7 +324,7 @@ const AttendanceList = () => {
                   rows={2}
                   name="remark"
                   value={formData.remark}
-                  onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
+                  onChange={handleFormChange}
                 />
               </div>
               <div className="d-flex justify-content-end gap-2">
@@ -307,11 +341,11 @@ const AttendanceList = () => {
           <Row className="mb-3 align-items-end">
             <Col md={4}>
               <Form.Control
-                placeholder="🔍 Search by teacher name or ID"
+                placeholder="🔍 Search by student name or ID" // Changed search placeholder
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
-                  setCurrentPage(0); // Reset to first page on search
+                  setCurrentPage(0);
                 }}
               />
             </Col>
@@ -345,7 +379,7 @@ const AttendanceList = () => {
                         <tr>
                           <th>#</th>
                           <th>Date</th>
-                          <th>Teacher</th>
+                          <th>Student</th> {/* Changed from Teacher to Student */}
                           <th>Status</th>
                           <th>Remark</th>
                           <th className='text-end'>Actions</th>
@@ -366,12 +400,12 @@ const AttendanceList = () => {
                               </td>
                               <td>
                                 <Form.Select
-                                  name="teacherId"
-                                  value={eAttendance.teacherId}
+                                  name="studentId" // Changed name to studentId
+                                  value={eAttendance.studentId}
                                   onChange={handleEditChange}
                                 >
-                                  {availableTeachers.map((teacher) =>
-                                    <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                                  {availableStudents.map((student) => // Map over availableStudents
+                                    <option key={student.id} value={student.id}>{student.name || student.id}</option>
                                   )}
                                 </Form.Select>
                               </td>
@@ -407,7 +441,8 @@ const AttendanceList = () => {
                             <tr key={att.id}>
                               <td>{idx + 1}</td>
                               <td>{att.date}</td>
-                              <td>{att.teacher?.user?.name || 'N/A'}</td>
+                            
+                              <td>{att.student?.user?.name || 'N/A'}</td> {/* Changed from teacher to student */}
                               <td>{att.status}</td>
                               <td>{att.remark}</td>
                               <td className="text-end d-flex justify-content-end gap-2">
@@ -434,7 +469,7 @@ const AttendanceList = () => {
               ))}
             </Accordion>
           )}
-          {pageCount > 1 && ( // Only show pagination if there's more than one page
+          {pageCount > 1 && (
             <div className="d-flex justify-content-center mt-4">
               <ReactPaginate
                 pageCount={pageCount}

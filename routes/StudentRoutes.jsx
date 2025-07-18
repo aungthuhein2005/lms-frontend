@@ -11,6 +11,9 @@ import Attendances from "../pages/Student/Attendances";
 import Settings from "../pages/Student/Settings";
 import ClassDetail from "../components/ClassDetail";
 import Module from "../pages/Admin/Module";
+import Progress from "../pages/Student/Progress";
+import ExamAttempt from "../pages/Student/ExamAttempt";
+import ExamResultPage from "../pages/Student/ExamResult";
 
 const StudentRoutes  = (
     <Route path="/student" element={<StudentLayout />}>
@@ -22,7 +25,10 @@ const StudentRoutes  = (
       <Route path="timetable" element={<Timetable/>} />
         <Route path="assignments" element={<Assignments/>} />
         <Route path="grades" element={<Grades/>} />
-        <Route path="exams" element={<Exams/>} />
+       <Route path="exams" element={<Exams />} />
+    <Route path="exams/:id/attempt" element={<ExamAttempt />} />
+    <Route path="exam/:id/result" element={<ExamResultPage />} />
+        <Route path="progress" element={<Progress/>} />
         <Route path="attendances" element={<Attendances/>} />
         <Route path="settings" element={<Settings/>} />
     </Route>

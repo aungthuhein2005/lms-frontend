@@ -22,6 +22,10 @@ import AcademicYearDetail from '../pages/Admin/AcademicYearDetail';
 import SemesterDetail from '../pages/Admin/SemesterDetail';
 import Subjects from '../pages/Admin/Subject';
 import AttendanceList from '../pages/Admin/AttendancceList';
+import StudentGradesReport from '../pages/Admin/StudentGradeReport';
+import ClassPerformanceSummary from '../pages/Admin/ClassPerformanceSummary';
+import CourseEnrollmentSummary from '../pages/Admin/CourseEnrollementSummary';
+import TeacherAttendanceReport from '../pages/Admin/TeacherAttendanceReport';
 
 const AdminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -44,6 +48,11 @@ const AdminRoutes = (
     <Route path="users/create" element={<UserCreate />} />
     <Route path="teachers_attendance" element={<AttendanceList />} />
     <Route path="report" element={<Report />} />
+    <Route path="/admin/reports/student-grades" element={<StudentGradesReport/>} />
+<Route path="/admin/reports/class-performance" element={<ClassPerformanceSummary />} />
+<Route path="/admin/reports/course-enrollment" element={<CourseEnrollmentSummary />} />
+<Route path="/admin/reports/teacher-attendacne" element={<TeacherAttendanceReport />} />
+
   </Route>
 );
 

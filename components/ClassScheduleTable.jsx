@@ -2,7 +2,7 @@ import { Table } from 'react-bootstrap';
 import { formatTime24to12 } from '../helpers/timeFormatter';
 
 export default function ClassScheduleTable({ schedules = [] }) {
-    console.log(schedules);
+
     
   return (
     <div className="mt-4">

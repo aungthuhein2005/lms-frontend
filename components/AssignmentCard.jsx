@@ -1,19 +1,22 @@
 import React, { useCallback, useState } from 'react';
-import { Badge, Button, Card, Row, Col, Modal, Spinner } from 'react-bootstrap';
+import {
+  Badge, Button, Card, Row, Col, Modal, Spinner
+} from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
-import { uploadMedia} from '../helpers/fileUploader';
 import { useSelector } from 'react-redux';
 import { useSubmitAssignmentMutation } from '../features/api/assignementApiSlice';
+import { uploadMedia } from '../helpers/fileUploader';
 
 export default function AssignmentCard({ assignment }) {
-
-  const {roleId} = useSelector(state=>state.auth.user);
+  const { roleId } = useSelector(state => state.auth.user);
   const [showModal, setShowModal] = useState(false);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [submitAssignment] = useSubmitAssignmentMutation();
+
   const {
+    id,
     title,
     description,
     dueDate,
@@ -24,19 +27,13 @@ export default function AssignmentCard({ assignment }) {
     classname,
   } = assignment;
 
-  
-
   const onDrop = useCallback((acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
     setFile(uploadedFile);
     setPreviewUrl(URL.createObjectURL(uploadedFile));
   }, []);
 
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive
-  } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'video/*': [],
@@ -55,10 +52,11 @@ export default function AssignmentCard({ assignment }) {
     setIsUploading(false);
 
     if (result) {
-      submitAssignment({
-      assignmentId: assignment.id,
-      studentId: roleId,
-      fileUrl: result.mediaURL})
+      await submitAssignment({
+        assignmentId: id,
+        studentId: roleId,
+        fileUrl: result.mediaURL
+      });
       alert("Upload successful!");
       setShowModal(false);
       setFile(null);
@@ -76,7 +74,7 @@ export default function AssignmentCard({ assignment }) {
 
   return (
     <>
-      <Card className="shadow-sm mb-4 border-start">
+      <Card className="shadow-sm mb-4 mx-2">
         <Card.Body>
           <Row className="align-items-center">
             <Col md={9}>
@@ -94,7 +92,6 @@ export default function AssignmentCard({ assignment }) {
                 <strong>Teacher:</strong> {teacher}
               </p>
               <p className="mb-2">{description}</p>
-
               <p className="mb-0">
                 <strong>Due Date:</strong> {dueDate} &nbsp;&nbsp;
                 <strong>Points:</strong> {point}
@@ -105,9 +102,9 @@ export default function AssignmentCard({ assignment }) {
                   href={media}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="d-block mt-2"
+                  className="d-block mt-2 text-primary fw-semibold"
                 >
-                  View Attachment
+                  📎 View Attachment
                 </a>
               )}
             </Col>
@@ -123,7 +120,6 @@ export default function AssignmentCard({ assignment }) {
         </Card.Body>
       </Card>
 
-      {/* Inline Dropzone Modal */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Submit Assignment</Modal.Title>
@@ -132,10 +128,7 @@ export default function AssignmentCard({ assignment }) {
           <div
             {...getRootProps()}
             className="p-4 border border-secondary rounded text-center mb-3"
-            style={{
-              cursor: "pointer",
-              backgroundColor: isDragActive ? "#f8f9fa" : "#fff"
-            }}
+            style={{ cursor: "pointer", backgroundColor: isDragActive ? "#f8f9fa" : "#fff" }}
           >
             <input {...getInputProps()} />
             {previewUrl ? (
@@ -152,14 +145,12 @@ export default function AssignmentCard({ assignment }) {
                 )}
                 {file.type === "application/pdf" && (
                   <div className="text-danger mb-2">
-                    <i className="bx bxs-file-pdf bx-lg"></i>
-                    <span> PDF File</span>
+                    <i className="bx bxs-file-pdf bx-lg"></i> PDF File
                   </div>
                 )}
                 {file.type === "text/plain" && (
                   <div className="text-muted mb-2">
-                    <i className="bx bxs-file-txt bx-lg"></i>
-                    <span> Text File</span>
+                    <i className="bx bxs-file-txt bx-lg"></i> Text File
                   </div>
                 )}
                 <p>{file.name}</p>

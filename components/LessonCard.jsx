@@ -1,5 +1,7 @@
+import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Button } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const LessonCard = ({
@@ -12,9 +14,15 @@ const LessonCard = ({
   editLesson,
   moduleId,
 }) => {
-  // Local state to store preview URL for the selected file
+  const {role,roleId} = useSelector(state=>state.auth.user);
   const [previewURL, setPreviewURL] = useState(null);
   const fileInputRef = useRef(null);
+
+  const completeLesson = (lessonId) => {
+    const resp = axios.post('http://localhost:8080/progress/complete', {lessonId,studentId: roleId})
+    console.log(resp);
+    
+  }
 
   // Update preview if eLesson.mediaFile (File object) changes
   useEffect(() => {
@@ -169,8 +177,13 @@ const LessonCard = ({
             "No media"
           )}
         </Card.Text>
-
-        <div className="d-flex justify-content-end">
+          {role === 'STUDENT' && (
+          <div className="d-flex justify-content-end">
+            <Button variant="outline-primary" className="me-2" onClick={()=>completeLesson(lessonItem.id)}>
+              completed
+              </Button>
+              </div>)}
+        {role === 'ADMIN' && (<div className="d-flex justify-content-end">
           <Button variant="outline-success" className="me-2">
             <Link to={`/teacher/lessons/${lessonItem.id}/assignments`} className="text-decoration-none text-success">
               <i className="bx bx-task"></i> Assignments
@@ -182,7 +195,7 @@ const LessonCard = ({
           <Button variant="outline-danger" onClick={() => deleteLesson(lessonItem.id, moduleId)}>
             <i className="bx bxs-trash"></i>
           </Button>
-        </div>
+        </div>)}
       </Card.Body>
     </Card>
   );

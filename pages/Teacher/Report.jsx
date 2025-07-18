@@ -9,18 +9,18 @@ export default function Report() {
       description: "Shows students' grades by class or subject.",
       path: "/admin/reports/student-grades",
     },
-    // {
-    //   name: "Teacher Attendance Report",
-    //   description: "Displays attendance records of teachers.",
-    //   path: "/admin/reports/teacher-attendacne",
-    // },
+    {
+      name: "Student Attendance Report",
+      description: "Displays attendance records of teachers.",
+      path: "/admin/reports/teacher-attendance",
+    },
     {
       name: "Class Performance Summary",
       description: "Shows performance summaries of each class.",
       path: "/admin/reports/class-performance",
     },
     {
-      name: "Course Enrollment Summary",
+      name: "Course Peformance Summary",
       description: "Lists how many students enrolled in each course.",
       path: "/admin/reports/course-enrollment",
     },
@@ -52,6 +52,11 @@ export default function Report() {
                           <i className="bx bx-show"></i> View
                         </Button>
                       </Link>
+                    </OverlayTrigger>
+                    <OverlayTrigger overlay={<Tooltip>Export Report</Tooltip>}>
+                      <Button variant="outline-success" size="sm" onClick={() => alert(`Exporting: ${report.name}`)}>
+                        <i className="bx bx-download"></i> Export
+                      </Button>
                     </OverlayTrigger>
                   </td>
                 </tr>

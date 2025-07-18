@@ -1,11 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Card, Badge } from "react-bootstrap";
 import { FaUserGraduate } from "react-icons/fa";
 import DateHelper from "../helpers/DateHelper";
+import axios from "axios";
 
-export default function StudentList({ students = [] }) {
-    console.log(students);
+export default function StudentList({ students = [],courseId }) {
+    console.log(courseId);
     
+   const [progressMap, setProgressMap] = useState({});
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const newMap = {};
+      for (let student of students) {
+        
+        try {
+          const resp = await axios.get(`http://localhost:8080/progress/progress-percent`, {
+            params: {
+              studentId: student.id,
+              courseId: courseId, 
+            },
+          });
+          
+          newMap[student.id] = resp.data;
+        } catch (error) {
+          
+          newMap[student.id] = 0;
+        }
+      }
+      setProgressMap(newMap);
+    };
+
+    if (students.length > 0) {
+      fetchProgress();
+    }
+  }, [students, courseId]);
+  
+
   return (
     <Card className="shadow-sm rounded-4 mt-4">
       <Card.Body>
@@ -25,15 +56,21 @@ export default function StudentList({ students = [] }) {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Enrollment Date</th>
+                 <th>Progress</th> 
               </tr>
             </thead>
             <tbody>
               {students.map((student, index) => (
                 <tr key={student.id}>
-                  <td>{index + 1}</td>
+                  <td>{student.id}</td>
                   <td>{student?.name || "Unknown"}</td>
                   <td>{student?.email || "N/A"}</td>
                   <td>{DateHelper.formatYMD(student.enrollDate) || "N/A"}</td>
+                  <td>
+          <Badge bg="secondary">
+            {progressMap[student.id] ?? "Loading..."}%
+          </Badge>
+        </td>
                 </tr>
               ))}
             </tbody>

@@ -13,6 +13,11 @@ import { semesterServiceApiSlice } from "../features/api/semesterServiceApiSlice
 import { assignmentApi } from "../features/api/assignementApiSlice";
 import { courseApiSlice } from "../features/api/courseApiSlice";
 import { gradeApiSlice } from "../features/api/gradeApiSlice";
+import { studentDashboardApiSlice } from "../features/api/studentDashboardApiSlice";
+import { attendanceApiSlice } from "../features/api/attendanceApiSlice";
+import { teacherDashboardApiSlice } from "../features/api/teacherDashboardApiSlice";
+import { examApiSlice } from "../features/api/examApiSlice";
+import { adminDashboardApiSlice } from "../features/api/adminDashboardApiSlice";
 
 const store = configureStore({
     reducer: {
@@ -30,6 +35,11 @@ const store = configureStore({
        [assignmentApi.reducerPath]: assignmentApi.reducer,
        [courseApiSlice.reducerPath]: courseApiSlice.reducer,
        [gradeApiSlice.reducerPath]: gradeApiSlice.reducer,
+       [studentDashboardApiSlice.reducerPath]: studentDashboardApiSlice.reducer,
+       [attendanceApiSlice.reducerPath]: attendanceApiSlice.reducer,
+       [teacherDashboardApiSlice.reducerPath]: teacherDashboardApiSlice.reducer,
+       [examApiSlice.reducerPath]: examApiSlice.reducer,
+       [adminDashboardApiSlice.reducerPath]: adminDashboardApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -43,7 +53,12 @@ const store = configureStore({
     .concat(semesterServiceApiSlice.middleware)
     .concat(assignmentApi.middleware)
     .concat(courseApiSlice.middleware)
-    .concat(gradeApiSlice.middleware),
+    .concat(gradeApiSlice.middleware)
+    .concat(studentDashboardApiSlice.middleware)
+    .concat(attendanceApiSlice.middleware)
+    .concat(teacherDashboardApiSlice.middleware)
+    .concat(examApiSlice.middleware)
+    .concat(adminDashboardApiSlice.middleware),
 });
 
 export default store;

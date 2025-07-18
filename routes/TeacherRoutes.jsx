@@ -15,6 +15,9 @@ import TeacherAssignmentPage from "../pages/Teacher/TeacherAssignment";
 import ViewSubmissions from "../pages/Teacher/ViewSubmission";
 import ProgreassGrading from "../pages/Teacher/ProgreassGrading";
 import GradingPage from "../pages/Teacher/GradingPage";
+import Grading from "../pages/Teacher/Grading";
+import AttendanceList from "../pages/Teacher/AttendancceList";
+import Report from "../pages/Teacher/Report";
 
 const TeacherRoutes = (
     <Route path="/teacher" element={<TeacherLayout />}>
@@ -25,14 +28,16 @@ const TeacherRoutes = (
         <Route path="classes" element={<Classes/>}/>
         <Route path="classes/:id" element={<ClassDetail/>}/>
         <Route path="timetable" element={<TeacherTimetable/>} />
-        <Route path="exams" element={<Exam />} />
+    <Route path="student_attendance" element={<AttendanceList />} />
+    <Route path="exams" element={<Exam />} />
     <Route path="exams/:id/details" element={<ExamDetailPage />} />
     <Route path="exams/create" element={<CreateExam />} />
     <Route path="exams/edit/:id" element={<EditExam />} />
     <Route path="assignments" element={<TeacherAssignmentPage />} />
-    <Route path="grades" element={<ProgreassGrading />} />
+    <Route path="grades" element={<Grading />} />
     <Route path="grades/student/:id" element={<GradingPage />} />
     <Route path="assignments/:assignmentId/submissions" element={<ViewSubmissions />} />
+    <Route path="reports" element={<Report />} />
     </Route>
 )
 
