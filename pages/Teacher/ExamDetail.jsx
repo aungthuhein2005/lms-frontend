@@ -6,51 +6,66 @@ const ExamDetailPage = () => {
   const { id } = useParams();
   const [exam, setExam] = useState(null);
   const navigate = useNavigate();
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExam = async () => {
       const response = await axios.get(`http://localhost:8080/exams/${id}`);
       setExam(response.data);
     };
+    const fetchScores = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/results/exam/${id}`
+        );
+        setScores(response.data);
+      } catch (error) {
+        console.error("Error fetching student scores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchExam();
+    fetchScores();
   }, [id]);
 
   return (
     <div className="p-4">
-      <h3>Exam Details</h3>
       {exam ? (
         <div>
-          <h5>Title:{exam.title}</h5>
-          <h5>Description: {exam.description}</h5>
-          <h5>Duration: {exam.duration} min</h5>
-          <h5>Score:{exam.score}</h5>
-          <h5 className="mt-4">Questions:</h5>
-          {exam.questions && exam.questions.length > 0 ? (
-            exam.questions.map((q, index) => (
-              <div key={index} className="card my-3 shadow-sm">
-                <div className="card-body">
-                  <h6>
-                    <strong>Q{index + 1}:</strong> {q.questionText}
-                  </h6>
-                  <div className="mt-2">
-                    {q.options.map((option, optIndex) => (
-                      <div key={optIndex} className="form-check">
-                        <input
-                          type="radio"
-                          name={`question-${index}`}
-                          className="form-check-input"
-                          disabled
-                        />
-                        <label className="form-check-label">{option}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No questions found.</p>
-          )}
+          <h5 className="mt-4">{exam.title} : </h5>
+          <h5 className="mt-4">{exam.description} </h5>
+          <div className="container mt-4">
+            <h3>Student Scores for Exam : </h3>
+            <table className="table table-striped table-bordered mt-3">
+              <thead className="table-dark">
+                <tr>
+                  <th>No</th>
+                  <th>Student ID</th>
+                  {/* <th>Student Name</th> */}
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scores.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="text-center">
+                      No student scores found.
+                    </td>
+                  </tr>
+                ) : (
+                  scores.map((score, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{score.studentId}</td>
+                      <td>{score.score}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
           <button
             className="btn btn-secondary mt-3"
             onClick={() => navigate("/teacher/exams")}

@@ -5,6 +5,8 @@ import axios from "axios";
 const EditExam = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
 
   const [exam, setExam] = useState({
     title: "",
@@ -25,6 +27,7 @@ const EditExam = () => {
           duration: response.data.duration,
           score: response.data.score,
         });
+        setSelectedClassId(response.data.classId);
 
         const fetchedQuestions = response.data.questions.map((q) => ({
           ...q,
@@ -36,7 +39,17 @@ const EditExam = () => {
       }
     };
 
+    const fetchClasses = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/class/all");
+        setClasses(response.data);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+      }
+    };
+
     fetchExam();
+    fetchClasses();
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -47,8 +60,10 @@ const EditExam = () => {
   };
 
   const handleQuestionChange = (index, e) => {
+    const { name, value } = e.target;
     const newQuestions = [...questions];
-    newQuestions[index][e.target.name] = e.target.value;
+    newQuestions[index][name] =
+      name === "correctAnswer" ? parseInt(value) : value;
     setQuestions(newQuestions);
   };
 
@@ -60,7 +75,7 @@ const EditExam = () => {
 
   const handleUpdateExam = async (e) => {
     e.preventDefault();
-    const updatedExam = { ...exam, questions };
+    const updatedExam = { ...exam, questions, classId: selectedClassId };
 
     try {
       await axios.put(`http://localhost:8080/exams/update/${id}`, updatedExam);
@@ -117,6 +132,23 @@ const EditExam = () => {
           />
         </div>
 
+        <div className="form-group mb-2">
+          <label>Class</label>
+          <select
+            className="form-control"
+            value={selectedClassId}
+            onChange={(e) => setSelectedClassId(e.target.value)}
+            required
+          >
+            <option value="" disabled hidden></option>
+            {classes.map((classes) => (
+              <option key={classes.id} value={classes.id}>
+                {classes.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <h4>Questions</h4>
         {questions.map((question, index) => (
           <div key={index} className="card mb-2 p-2">
@@ -132,13 +164,28 @@ const EditExam = () => {
             </div>
             <div className="form-group mb-2">
               <label>Correct Answer</label>
-              <input
-                type="text"
+              <select
                 name="correctAnswer"
                 value={question.correctAnswer}
-                onChange={(e) => handleQuestionChange(index, e)}
+                onChange={(e) =>
+                  handleQuestionChange(index, {
+                    target: {
+                      name: "correctAnswer",
+                      value: parseInt(e.target.value),
+                    },
+                  })
+                }
                 className="form-control"
-              />
+              >
+                <option value="" disabled hidden>
+                  Select Correct Option
+                </option>
+                {question.options.map((opt, optIndex) => (
+                  <option key={optIndex} value={optIndex}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -158,8 +205,18 @@ const EditExam = () => {
           </div>
         ))}
 
-        <button type="submit" className="btn btn-primary">
+        <button
+          type="submit"
+          className="btn btn-primary mt-3"
+          style={{ marginRight: "15px" }}
+        >
           Update Exam
+        </button>
+        <button
+          className="btn btn-secondary mt-3"
+          onClick={() => navigate("/teacher/exams")}
+        >
+          Back
         </button>
       </form>
     </div>

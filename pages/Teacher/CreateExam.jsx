@@ -1,18 +1,28 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const CreateExam = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [score, setScore] = useState("");
+  const [classId, setClassId] = useState("");
+  const [classes, setClasses] = useState([]);
 
   const [questions, setQuestions] = useState([
-    { questionText: "", correctAnswer: "", options: [""] },
+    { questionText: "", correctAnswer: null, options: [""] },
   ]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/class/all")
+      .then((response) => setClasses(response.data))
+      .catch((error) => console.error("Error fetching classes", error));
+  }, []);
 
   const handleQuestionChange = (index, field, value) => {
     const updatedQuestions = [...questions];
@@ -60,6 +70,7 @@ const CreateExam = () => {
       description,
       duration,
       score,
+      classId,
       questions,
     };
 
@@ -116,6 +127,26 @@ const CreateExam = () => {
             onChange={(e) => setScore(e.target.value)}
             required
           />
+        </div>
+
+        <div className="mb-3">
+          <label> Class :</label>
+          <select
+            className="form-control"
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
+            required
+          >
+            <option value="" disabled hidden>
+              {" "}
+              Select Class
+            </option>
+            {classes.map((classes) => (
+              <option key={classes.id} value={classes.id}>
+                {classes.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button
@@ -176,15 +207,23 @@ const CreateExam = () => {
 
             <div className="mb-2">
               <label>Correct Answer:</label>
-              <input
-                type="text"
+              <select
                 className="form-control"
                 value={q.correctAnswer}
                 onChange={(e) =>
                   handleQuestionChange(qIndex, "correctAnswer", e.target.value)
                 }
                 required
-              />
+              >
+                <option value="" disabled>
+                  Select correct option
+                </option>
+                {q.options.map((opt, optIndex) => (
+                  <option key={optIndex} value={optIndex}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button
